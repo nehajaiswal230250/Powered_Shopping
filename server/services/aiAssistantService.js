@@ -398,3 +398,82 @@ export const transcribeAudio = async ({ audioBase64, mimeType = "audio/webm" }) 
   const geminiApiKey = process.env.GEMINI_API_KEY;
   if (geminiApiKey && !geminiApiKey.includes("your_")) {
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+    const response = await ai.models.generateContent({
+      model: getGeminiTranscribeModel(),
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                mimeType,
+                data: audioBase64
+              }
+            },
+            {
+              text: [
+                "Transcribe this shopping voice command into plain text.",
+                "Return only the spoken words.",
+                "Do not add quotes, labels, markdown, or explanation."
+              ].join(" ")
+            }
+          ]
+        }
+      ]
+    });
+
+    const text = String(response?.text || "").trim();
+    if (text) {
+      return { text };
+    }
+  }
+
+  const openAiApiKey = process.env.OPENAI_API_KEY;
+  if (!openAiApiKey || openAiApiKey.includes("your_")) {
+    throw new Error("AI transcription is not configured. Add GEMINI_API_KEY to server/.env.");
+  }
+
+  const ext = inferFileExt(mimeType);
+  const formData = new FormData();
+  formData.append("model", getTranscribeModel());
+  formData.append(
+    "file",
+    new Blob([audioBuffer], { type: mimeType }),
+    `voice-command.${ext}`
+  );
+
+  const response = await fetch(OPENAI_TRANSCRIBE_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openAiApiKey}`
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    const detail = await readOpenAiError(response);
+    throw new Error(
+      detail
+        ? `Transcription failed (${response.status}): ${detail}`
+        : `Transcription failed (${response.status}).`
+    );
+  }
+
+  const data = await response.json();
+  const text = String(data?.text || "").trim();
+  if (!text) {
+    throw new Error("Could not transcribe speech.");
+  }
+
+  return { text };
+};
+const OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions";
+
+const inferFileExt = (mimeType = "") => {
+  if (mimeType.includes("webm")) return "webm";
+  if (mimeType.includes("mp4")) return "mp4";
+  if (mimeType.includes("wav")) return "wav";
+  if (mimeType.includes("mpeg")) return "mp3";
+  if (mimeType.includes("ogg")) return "ogg";
+  return "webm";
+};
