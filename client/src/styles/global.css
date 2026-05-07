@@ -1098,3 +1098,203 @@ a {
     opacity: 0.55;
   }
   50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.ai-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.ai-activity-copy {
+  z-index: 1;
+}
+
+.ai-activity-row strong {
+  font-size: 1rem;
+}
+
+.ai-activity-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--muted) 40%, transparent);
+  border-top-color: color-mix(in srgb, var(--accent-strong) 70%, transparent);
+  animation: aiSpin 900ms linear infinite;
+}
+
+@keyframes aiSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-activity-command {
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.ai-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.26rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border));
+  background: color-mix(in srgb, var(--surface-muted) 86%, transparent);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  transform: translateY(4px);
+  animation: aiChipIn 520ms ease forwards;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+
+.ai-chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    color-mix(in srgb, var(--accent-strong) 70%, white),
+    transparent 62%
+  );
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+@keyframes aiChipIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filters.ai-scanning {
+  border-color: color-mix(in srgb, var(--accent-strong) 38%, var(--border));
+  box-shadow:
+    var(--shadow),
+    0 0 44px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.filters.ai-scanning::after {
+  opacity: 1;
+  animation: glassSheen 1.1s ease;
+}
+
+.ai-cursor-ghost {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.ai-cursor-ghost .ghost {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.95),
+    color-mix(in srgb, var(--accent-strong) 55%, transparent) 34%,
+    transparent 72%
+  );
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 0 70px color-mix(in srgb, var(--accent-cool) 14%, transparent);
+  transform: translate3d(calc(var(--x0) * 1px), calc(var(--y0) * 1px), 0);
+  animation: aiGhostFly 900ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.ai-cursor-ghost .trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
+  transform-origin: 0 50%;
+  opacity: 0.85;
+  transform: translate3d(calc(var(--x0) * 1px), calc(var(--y0) * 1px), 0)
+    rotate(calc(var(--angle) * 1deg));
+  animation: aiGhostTrail 900ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes aiGhostFly {
+  0% {
+    transform: translate3d(calc(var(--x0) * 1px), calc(var(--y0) * 1px), 0) scale(0.88);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(calc(var(--x1) * 1px), calc(var(--y1) * 1px), 0) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes aiGhostTrail {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.75;
+  }
+  100% {
+    width: calc(var(--dist) * 1px);
+    opacity: 0;
+  }
+}
+
+.product-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  box-shadow:
+    var(--shadow),
+    0 0 38px color-mix(in srgb, var(--accent) 16%, transparent);
+  animation-play-state: paused;
+}
+
+.product-card:nth-child(3n + 1) {
+  animation: productFloat 8s ease-in-out infinite;
+}
+
+.product-card:nth-child(3n + 2) {
+  animation: productFloat 8.8s ease-in-out 600ms infinite;
+}
+
+.product-card:nth-child(3n + 3) {
+  animation: productFloat 9.4s ease-in-out 1100ms infinite;
+}
+
+@keyframes productFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
