@@ -1298,3 +1298,203 @@ export default function HomePage({ currentUser, onLogout }) {
                 </article>
               </section>
 
+              <section className="layout">
+                <section className="glass simple-panel">
+                  <div className="panel-head">
+                    <div>
+                      <h2>Quick actions</h2>
+                      <p className="status">Launch the most-used flows from one control cluster.</p>
+                    </div>
+                  </div>
+                  <div className="simple-actions">
+                    <button type="button" onClick={() => setActiveView("shop")}>
+                      Open catalog
+                    </button>
+                    <button type="button" onClick={() => setActiveView("assistant")}>
+                      Open assistant
+                    </button>
+                    <button type="button" onClick={() => loadRecommendations({ type: "trending" })}>
+                      Refresh recommendations
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openCheckoutView}
+                      disabled={!cart.count}
+                    >
+                      Open checkout
+                    </button>
+                  </div>
+                </section>
+
+                <HistoryPanel history={recentHistory} />
+              </section>
+
+              <section className="layout">
+                <section className="glass simple-panel">
+                  <div className="panel-head">
+                    <div>
+                      <h2>Categories</h2>
+                      <p className="status">Jump straight into category results.</p>
+                    </div>
+                  </div>
+                  <div className="category-list">
+                    {categories.map((category) => (
+                      <button type="button" key={category} onClick={() => jumpToCategory(category)}>
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <ShowcasePanel items={recommendations} />
+              </section>
+            </>
+          ) : null}
+
+          {activeView === "shop" ? (
+            <>
+              <VoiceControl {...voiceControlProps} />
+
+              <AiActivityBanner activity={aiActivity} />
+
+              <section
+                className={`filters glass ${
+                  aiActivity?.kind === "search" && aiActivity?.stage === "searching" ? "ai-scanning" : ""
+                }`}
+              >
+                <div className="filter-head">
+                  <div>
+                    <h2>Filters</h2>
+                    <p className="status">Use filters or commands to update the product list.</p>
+                  </div>
+                  <div className="filter-actions">
+                    <button type="button" onClick={applyFilters}>
+                      Apply
+                    </button>
+                    <button type="button" onClick={resetFilters}>
+                      Reset
+                    </button>
+                  </div>
+                </div>
+
+                <div className="filter-grid">
+                  <label>
+                    Search
+                    <input
+                      value={filters.q}
+                      onChange={(event) => setFilters((prev) => ({ ...prev, q: event.target.value }))}
+                      placeholder="Search title or category"
+                    />
+                  </label>
+                  <label>
+                    Category
+                    <select
+                      value={filters.category}
+                      onChange={(event) =>
+                        setFilters((prev) => ({ ...prev, category: event.target.value }))
+                      }
+                    >
+                      <option value="">All</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Brand
+                    <input
+                      value={filters.brand}
+                      onChange={(event) => setFilters((prev) => ({ ...prev, brand: event.target.value }))}
+                      placeholder="Nike, Adidas, Puma"
+                    />
+                  </label>
+                  <label>
+                    Sort
+                    <select
+                      value={filters.sort}
+                      onChange={(event) => setFilters((prev) => ({ ...prev, sort: event.target.value }))}
+                    >
+                      <option value="">Default</option>
+                      <option value="price_asc">Price: Low to high</option>
+                      <option value="price_desc">Price: High to low</option>
+                      <option value="rating_desc">Highest rated</option>
+                    </select>
+                  </label>
+                  <label>
+                    Max price
+                    <input
+                      type="number"
+                      min="0"
+                      value={filters.maxPrice}
+                      onChange={(event) =>
+                        setFilters((prev) => ({ ...prev, maxPrice: event.target.value }))
+                      }
+                      placeholder="3000"
+                    />
+                  </label>
+                  <label>
+                    Min rating
+                    <input
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={filters.minRating}
+                      onChange={(event) =>
+                        setFilters((prev) => ({ ...prev, minRating: event.target.value }))
+                      }
+                      placeholder="4"
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <p className="status-line">{statusLine}</p>
+
+              <section className="simple-grid">
+                <article className="glass summary-card">
+                  <span>Average price</span>
+                  <strong>Rs {stats.averagePrice.toLocaleString("en-IN")}</strong>
+                </article>
+                <article className="glass summary-card">
+                  <span>Under Rs 3000</span>
+                  <strong>{stats.budgetCount}</strong>
+                </article>
+                <article className="glass summary-card">
+                  <span>Top rated</span>
+                  <strong>{stats.topRated}</strong>
+                </article>
+              </section>
+
+              <section className="layout">
+                <div>
+                  <ProductGrid
+                    products={products}
+                    onAdd={addToCart}
+                    isLoading={isLoadingProducts}
+                    aiFocusProductId={aiFocusProductId}
+                  />
+                </div>
+                <div className="stack">
+                  <CartPanel
+                    cart={cart}
+                    onRemove={removeFromCart}
+                    onProceedCheckout={openCheckoutView}
+                  />
+                  <RecommendationsPanel items={recommendations} onAdd={addToCart} />
+                </div>
+              </section>
+            </>
+          ) : null}
+
+          {activeView === "cart" ? (
+            <section className="layout">
+              <CartPanel
+                cart={cart}
+                onRemove={removeFromCart}
+                onProceedCheckout={openCheckoutView}
+              />
+              <div className="stack">
+                <RecommendationsPanel items={recommendations} onAdd={addToCart} />
