@@ -998,3 +998,203 @@ def build_ui_slide() -> SlideBuilder:
         geom="roundRect",
         name="Mobile Frame",
     )
+    slide.add_picture(
+        "mobile",
+        x=inches(9.12),
+        y=inches(2.22),
+        w=inches(1.85),
+        h=inches(4.0),
+        name="Mobile Screenshot",
+    )
+    for idx, label in enumerate(
+        ["Desktop view", "Mobile view", "Live project proof"]
+    ):
+        slide.add_shape(
+            x=inches(0.85 + idx * 2.55),
+            y=inches(6.05),
+            w=inches(2.2),
+            h=inches(0.42),
+            fill=[COLORS["navy"], COLORS["teal"], COLORS["pink"]][idx],
+            line=None,
+            geom="roundRect",
+            text=[label],
+            font="Calibri",
+            size=1120,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"UI Chip {idx+1}",
+        )
+    add_footer(slide, "08")
+    return slide
+
+
+def build_stack_slide() -> SlideBuilder:
+    slide = SlideBuilder("Stack")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper_warm"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.72),
+        w=inches(4.3),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["What makes the project special"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    stats = [
+        ("Voice", "natural user input", COLORS["navy"]),
+        ("AI", "smart action handling", COLORS["orange"]),
+        ("Fallback", "better reliability", COLORS["teal"]),
+    ]
+    for idx, (num, label, color) in enumerate(stats):
+        slide.add_shape(
+            x=inches(0.8 + idx * 2.65),
+            y=inches(1.65),
+            w=inches(2.25),
+            h=inches(1.15),
+            fill=color,
+            line=None,
+            geom="roundRect",
+            text=[num, label],
+            font="Calibri",
+            size=2200 if idx == 0 else 1800,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, inches(0.05), 0, 0),
+            name=f"Stat {idx+1}",
+        )
+    stacks = [
+        ("Strength 1", COLORS["navy"], "Users can interact through both voice and manual text commands."),
+        ("Strength 2", COLORS["teal"], "Fallback logic keeps the app running if speech or AI services fail."),
+        ("Strength 3", COLORS["pink"], "The project connects UI, backend, auth, data, and AI in one flow."),
+        ("Strength 4", COLORS["green"], "The app is structured for classroom demo and real feature explanation."),
+    ]
+    for idx, (title, color, line) in enumerate(stacks):
+        col = idx % 2
+        row = idx // 2
+        x = 0.82 + col * 5.95
+        y = 3.25 + row * 1.45
+        slide.add_shape(
+            x=inches(x),
+            y=inches(y),
+            w=inches(5.15),
+            h=inches(0.95),
+            fill=COLORS["white"],
+            line=COLORS["blue_line"],
+            geom="roundRect",
+            name=f"Stack Card {idx+1}",
+        )
+        slide.add_shape(
+            x=inches(x + 0.18),
+            y=inches(y + 0.2),
+            w=inches(1.05),
+            h=inches(0.36),
+            fill=color,
+            line=None,
+            geom="roundRect",
+            text=[title],
+            font="Calibri",
+            size=1120,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"Stack Label {idx+1}",
+        )
+        slide.add_shape(
+            x=inches(x + 1.38),
+            y=inches(y + 0.16),
+            w=inches(3.45),
+            h=inches(0.45),
+            fill=None,
+            line=None,
+            text=[line],
+            font="Calibri",
+            size=1280,
+            color=COLORS["ink"],
+            txbox=True,
+            name=f"Stack Body {idx+1}",
+        )
+    add_footer(slide, "09")
+    return slide
+
+
+def build_evaluation_slide() -> SlideBuilder:
+    slide = SlideBuilder("Evaluation")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.72),
+        w=inches(5.2),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["Live demo plan"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    slide.add_shape(
+        x=inches(0.72),
+        y=inches(1.6),
+        w=inches(5.85),
+        h=inches(4.9),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Strengths",
+    )
+    slide.add_shape(
+        x=inches(6.72),
+        y=inches(1.6),
+        w=inches(5.45),
+        h=inches(4.9),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Gaps",
+    )
+    slide.add_shape(
+        x=inches(0.95),
+        y=inches(1.86),
+        w=inches(1.6),
+        h=inches(0.4),
+        fill=COLORS["green"],
+        geom="roundRect",
+        line=None,
+        text=["WHAT I WILL SHOW"],
+        font="Calibri",
+        size=1120,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Strengths Label",
+    )
+    strengths = [
+        "Login and protected entry into the dashboard",
+        "Product search through voice or typed command",
+        "Add to cart, view totals, and remove item",
+        "Checkout flow and final confirmation state",
+    ]
+    for idx, item in enumerate(strengths):
+        slide.add_shape(
+            x=inches(0.98),
+            y=inches(2.45 + idx * 0.82),
+            w=inches(5.15),
+            h=inches(0.52),
