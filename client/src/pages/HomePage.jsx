@@ -898,3 +898,203 @@ export default function HomePage({ currentUser, onLogout }) {
             const intentGuess = detectIntent(text);
             const shouldShowSearchFx = intentGuess?.type === "SEARCH";
             if (shouldShowSearchFx) {
+              const chips = buildChipsFromIntent(intentGuess);
+              startAiTask({
+                stage: "searching",
+                command: text,
+                detail: "AI is searching and applying filters…",
+                chips
+              });
+            }
+
+            const response = await api.aiChat({ message: text, history: aiHistory });
+            if (response?.reply) {
+              if (Array.isArray(response.ui?.products)) {
+                setProducts(response.ui.products);
+              }
+              if (Array.isArray(response.ui?.recommendations)) {
+                setRecommendations(response.ui.recommendations);
+              }
+              if (response.ui?.cart) {
+                setCart(response.ui.cart);
+              }
+              if (response.ui?.orderResult) {
+                setOrderResult(response.ui.orderResult);
+              }
+              if (typeof response.ui?.activeView === "string") {
+                setActiveView(response.ui.activeView);
+              }
+              if (response.ui?.lastCategory) {
+                setLastCategory(response.ui.lastCategory);
+                writeStoredValue(LAST_CATEGORY_KEY, response.ui.lastCategory);
+              }
+
+              if (shouldShowSearchFx && Array.isArray(response.ui?.products)) {
+                const chips = buildChipsFromIntent(intentGuess);
+                const focusProduct = pickFocusProduct(response.ui.products, text);
+                if (focusProduct?.id) {
+                  setAiActivity({
+                    kind: "search",
+                    stage: "scrolling",
+                    command: text,
+                    detail: `Scrolling to: ${focusProduct.title}`,
+                    chips
+                  });
+                  setAiFocusProductId(focusProduct.id);
+                  scheduleAiTimer(() => setAiFocusProductId(null), 2600);
+                  scheduleAiTimer(() => setAiActivity(null), 2300);
+                } else {
+                  setAiActivity({ kind: "search", stage: "done", command: text, detail: "Results ready.", chips });
+                  scheduleAiTimer(() => setAiActivity(null), 1400);
+                }
+              } else if (shouldShowSearchFx) {
+                scheduleAiTimer(() => setAiActivity(null), 900);
+              }
+
+              setUsingDemoData(false);
+              replyToUser(text, response.reply);
+              return;
+            }
+          } catch {
+            // Fall through to local reply below.
+          }
+        }
+
+        replyToUser(text, "I did not understand that command.");
+      } catch (error) {
+        replyToUser(text, `Something went wrong: ${error.message}`);
+      }
+    },
+    [
+      activeView,
+      addToCart,
+      assistantAwake,
+      buildChipsFromIntent,
+      cart.count,
+      history,
+      lastCategory,
+      loadProducts,
+      loadRecommendations,
+      openAssistant,
+      pickFocusProduct,
+      replyToUser,
+      resolveProductFromCommand,
+      scheduleAiTimer,
+      settings.aiAssistantMode,
+      startAiTask
+    ]
+  );
+
+  const {
+    supported,
+    isListening,
+    interimText,
+    error,
+    startListening,
+    stopListening
+  } = useSpeechRecognition({
+    onFinalResult: runManualCommand,
+    continuous
+  });
+
+  const toggleListening = () => {
+    if (forceFallback) {
+      recordFallbackCommand();
+      return;
+    }
+
+    if (isListening) {
+      stopListening();
+      setAssistantAwake(false);
+    } else {
+      startListening();
+    }
+  };
+
+  const recordFallbackCommand = useCallback(async () => {
+    if (isFallbackRecording) {
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setFallbackError("Fallback recording is not supported in this browser.");
+      return;
+    }
+
+    setFallbackError("");
+    setFallbackStatus("");
+    setIsFallbackRecording(true);
+
+    let stream;
+    try {
+      setFallbackStatus("Checking voice backend...");
+      await api.health();
+      setFallbackStatus("Recording...");
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const mimeType = window.MediaRecorder.isTypeSupported?.("audio/webm") ? "audio/webm" : "";
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      const chunks = [];
+
+      await new Promise((resolve, reject) => {
+        recorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            chunks.push(event.data);
+          }
+        };
+        recorder.onerror = () => reject(new Error("Recording failed."));
+        recorder.onstop = resolve;
+        recorder.start();
+
+        setTimeout(() => {
+          if (recorder.state !== "inactive") {
+            recorder.stop();
+          }
+        }, 4500);
+      });
+
+      const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+      if (!blob.size) {
+        throw new Error("No audio was recorded. Please try again.");
+      }
+
+      const arrayBuffer = await blob.arrayBuffer();
+      const audioBase64 = toBase64(new Uint8Array(arrayBuffer));
+      setFallbackStatus("Transcribing...");
+
+      const response = await api.transcribeAudio({ audioBase64, mimeType: blob.type });
+      const transcript = String(response?.text || "").trim();
+      if (!transcript) {
+        throw new Error("Could not detect clear speech.");
+      }
+
+      setFallbackStatus(`Heard: "${transcript}"`);
+      await runManualCommand(transcript);
+    } catch (err) {
+      setFallbackStatus("");
+      setFallbackError(formatVoiceError(err?.message || "Fallback voice command failed."));
+    } finally {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+      setIsFallbackRecording(false);
+    }
+  }, [isFallbackRecording, runManualCommand]);
+
+  useEffect(() => {
+    if (/(speech|network|service|unavailable)/.test(String(error || "").toLowerCase())) {
+      setForceFallback(true);
+      if (isListening) {
+        stopListening();
+      }
+    }
+  }, [error, isListening, stopListening]);
+
+  useEffect(() => {
+    if (shouldAutoStartMic) {
+      if (supported && !isListening && !forceFallback) {
+        startListening();
+      }
+      setShouldAutoStartMic(false);
+    }
+  }, [forceFallback, isListening, shouldAutoStartMic, startListening, supported]);
