@@ -388,4 +388,115 @@ T*
 T*
 (-  Subtotal) Tj
 T*
-(-  Shipp
+(-  Shipping \(free above threshold\)) Tj
+T*
+(-  Tax) Tj
+T*
+(-  Final payable amount) Tj
+T*
+() Tj
+T*
+(On successful order:) Tj
+T*
+(-  confirmation screen appears) Tj
+T*
+(-  shows Order ID and amount paid) Tj
+T*
+(-  `Continue Shopping` takes user back to browsing) Tj
+T*
+() Tj
+T*
+(10. SETTINGS INTERACTION \(SYSTEM\)) Tj
+T*
+() Tj
+T*
+(User can toggle:) Tj
+T*
+(-  Voice replies) Tj
+T*
+(-  AI assistant mode) Tj
+T*
+(-  Auto-open cart after add) Tj
+T*
+(-  Show floating microphone buttons) Tj
+T*
+(-  Compact layout density) Tj
+T*
+(-  High contrast mode) Tj
+T*
+() Tj
+T*
+(Utility actions:) Tj
+T*
+(-  Clear conversation history) Tj
+T*
+(-  Clear saved last category) Tj
+T*
+(-  Reset all settings to defaults) Tj
+T*
+() Tj
+T*
+(11. HELP AND FAQ) Tj
+T*
+() Tj
+T*
+(Help section gives user-readable answers for:) Tj
+T*
+(-  how to start voice commands) Tj
+T*
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 1447 >>
+stream
+BT
+/F1 10 Tf
+14 TL
+50 742 Td
+(-  shopping without voice) Tj
+T*
+(-  backup catalog behavior) Tj
+T*
+(-  cart persistence behavior) Tj
+T*
+(-  supported command types) Tj
+T*
+() Tj
+T*
+(12. FALLBACK BEHAVIOR USERS SHOULD KNOW) Tj
+T*
+() Tj
+T*
+(To keep experience stable, interface auto-falls back when a service is down:) Tj
+T*
+(-  If live catalog fails: backup catalog is used.) Tj
+T*
+(-  If browser speech recognition fails: fallback recorder is available.) Tj
+T*
+(-  If AI assistant mode fails: deterministic command parser handles common commands.) Tj
+T*
+(-  If cloud cart storage is unavailable: cart runs in temporary local memory mode.) Tj
+T*
+() Tj
+T*
+(From user perspective, app still works with minor feature limitations.) Tj
+T*
+() Tj
+T*
+(13. MOBILE INTERACTION NOTES) Tj
+T*
+() Tj
+T*
+(-  Sidebar opens with `Menu` button.) Tj
+T*
+(-  Floating `AI` and `Mic` buttons give quick access.) Tj
+T*
+(-  Core flows \(search, add, cart, checkout\) are available on mobile and desktop.) Tj
+T*
+() Tj
+T*
+(14. QUICK FIRST-TIME USER SCRIPT \(DEMO
