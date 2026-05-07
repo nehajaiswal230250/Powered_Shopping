@@ -198,3 +198,203 @@ html = f"""<!doctype html>
     .footer {{
       position: absolute;
       left: 54px;
+      bottom: 24px;
+      color: #617489;
+      font-size: 15px;
+    }}
+    .dark .footer {{ color: #dceaf7; }}
+    .screen-frame {{
+      position: absolute;
+      right: 54px;
+      top: 54px;
+      width: 560px;
+      height: 620px;
+      background: white;
+      border-radius: 26px;
+      border: 2px solid #b9d2eb;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(17,39,72,.18);
+    }}
+    .screen-frame img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }}
+    .chips {{ display: flex; gap: 14px; margin-top: 30px; }}
+    .chip {{
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.1);
+      color: white;
+      font-weight: 600;
+    }}
+    .cards4 {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+      margin-top: 34px;
+    }}
+    .card {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 22px;
+      padding: 22px 24px;
+      min-height: 220px;
+      box-shadow: 0 8px 24px rgba(17,39,72,.06);
+    }}
+    .card-label {{
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }}
+    .card p {{
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.3;
+      font-weight: 600;
+    }}
+    .two-col {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+      margin-top: 34px;
+    }}
+    .panel {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 24px;
+      padding: 24px;
+      min-height: 560px;
+      box-shadow: 0 8px 24px rgba(17,39,72,.06);
+    }}
+    .panel-title {{
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }}
+    .list {{
+      display: grid;
+      gap: 14px;
+      margin-top: 6px;
+    }}
+    .list-item {{
+      background: #dceaf7;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 22px;
+      line-height: 1.25;
+      font-weight: 600;
+    }}
+    .list-item.alt {{ background: #f8f5ef; }}
+    .process-wrap {{
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 28px;
+      margin-top: 28px;
+    }}
+    .process-steps {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 24px;
+      padding: 22px;
+    }}
+    .step {{
+      background: #dceaf7;
+      border-radius: 15px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-size: 22px;
+      line-height: 1.25;
+      font-weight: 600;
+    }}
+    .step.alt {{ background: #f8f5ef; }}
+    .process-image {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }}
+    .process-image img {{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+    }}
+    .architecture {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 34px;
+    }}
+    .col {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 22px;
+      padding: 18px;
+      min-height: 560px;
+    }}
+    .col-title {{
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }}
+    .col-item {{
+      background: #dceaf7;
+      border-radius: 15px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 19px;
+      line-height: 1.25;
+      font-weight: 600;
+    }}
+    .grid6 {{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 32px;
+    }}
+    .feature {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 22px;
+      padding: 20px;
+      min-height: 220px;
+    }}
+    .feature-title {{
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }}
+    .feature p {{
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.3;
+      font-weight: 600;
+    }}
+    .screens {{
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 24px;
+      margin-top: 32px;
+      align-items: start;
