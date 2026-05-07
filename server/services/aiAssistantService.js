@@ -198,3 +198,103 @@ const executeTool = async (name, args, context, state) => {
 
   if (name === "add_to_cart") {
     const productId = toNumber(args.productId);
+    if (!productId) {
+      return { success: false, message: "productId is required." };
+    }
+
+    const products = await getProducts();
+    const product = products.find((p) => p.id === productId);
+    if (!product) {
+      return { success: false, message: "Product not found." };
+    }
+
+    await cartStore.add(cartId, product);
+    const cart = summarizeCart(await cartStore.getItems(cartId));
+    state.cart = cart;
+    return { success: true, message: "Item added.", cart };
+  }
+
+  if (name === "remove_from_cart") {
+    const productId = toNumber(args.productId);
+    const titleQuery = args.titleQuery ? String(args.titleQuery) : "";
+
+    if (!productId && !titleQuery) {
+      return { success: false, message: "productId or titleQuery is required." };
+    }
+
+    if (productId) {
+      await cartStore.removeByProductId(cartId, productId);
+    } else {
+      await cartStore.removeByTitle(cartId, titleQuery);
+    }
+
+    const cart = summarizeCart(await cartStore.getItems(cartId));
+    state.cart = cart;
+    return { success: true, message: "Item removed.", cart };
+  }
+
+  if (name === "get_cart") {
+    const cart = summarizeCart(await cartStore.getItems(cartId));
+    state.cart = cart;
+    return { success: true, cart };
+  }
+
+  if (name === "checkout") {
+    const cart = summarizeCart(await cartStore.getItems(cartId));
+    if (!cart.count) {
+      return { success: false, message: "Cart is empty." };
+    }
+
+    const orderResult = {
+      orderId: `ORD-${Date.now().toString().slice(-8)}`,
+      paidAmount: cart.total,
+      customerName: args.customerName ? String(args.customerName) : ""
+    };
+
+    await cartStore.clear(cartId);
+    state.cart = { items: [], total: 0, count: 0 };
+    state.orderResult = orderResult;
+    state.activeView = "checkout";
+    return { success: true, orderResult };
+  }
+
+  return { success: false, message: `Unknown tool: ${name}` };
+};
+
+const openAiCall = async (messages) => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("AI assistant is not configured.");
+  }
+
+  const response = await fetch(OPENAI_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: getChatModel(),
+      temperature: 0.2,
+      messages,
+      tools: toolSpec,
+      tool_choice: "auto"
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI request failed (${response.status}).`);
+  }
+
+  const data = await response.json();
+  return data?.choices?.[0]?.message || null;
+};
+
+const normalizeHistory = (history = []) =>
+  history
+    .filter((item) => item && (item.role === "user" || item.role === "assistant") && item.content)
+    .slice(-8)
+    .map((item) => ({ role: item.role, content: String(item.content) }));
+
+const readOpenAiError = async (response) => {
+  const rawText = await response.text();
