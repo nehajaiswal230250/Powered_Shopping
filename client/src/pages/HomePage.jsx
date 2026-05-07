@@ -1098,3 +1098,203 @@ export default function HomePage({ currentUser, onLogout }) {
       setShouldAutoStartMic(false);
     }
   }, [forceFallback, isListening, shouldAutoStartMic, startListening, supported]);
+
+  useEffect(() => {
+    loadCategories();
+    loadCart();
+    loadRecommendations({ type: "trending" });
+    loadProducts();
+  }, [loadCart, loadCategories, loadProducts, loadRecommendations]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    writeStoredValue(THEME_KEY, theme);
+  }, [theme]);
+
+  useEffect(() => {
+    writeStoredValue(SETTINGS_KEY, JSON.stringify(settings));
+  }, [settings]);
+
+  const applyFilters = async () => {
+    const params = {};
+    if (filters.q) params.q = filters.q;
+    if (filters.category) params.category = filters.category;
+    if (filters.brand) params.brand = filters.brand;
+    if (filters.sort) params.sort = filters.sort;
+    if (filters.maxPrice) params.maxPrice = Number(filters.maxPrice);
+    if (filters.minRating) params.minRating = Number(filters.minRating);
+
+    const found = await loadProducts(params);
+    if (filters.category) {
+      setLastCategory(filters.category);
+      writeStoredValue(LAST_CATEGORY_KEY, filters.category);
+    }
+    return found;
+  };
+
+  const resetFilters = async () => {
+    setFilters({
+      q: "",
+      category: "",
+      brand: "",
+      sort: "",
+      maxPrice: "",
+      minRating: ""
+    });
+    await loadProducts();
+  };
+
+  const jumpToCategory = async (category) => {
+    setFilters((prev) => ({ ...prev, category }));
+    setLastCategory(category);
+    writeStoredValue(LAST_CATEGORY_KEY, category);
+    await loadProducts({ category });
+    setActiveView("shop");
+  };
+
+  const stats = useMemo(() => {
+    if (!products.length) {
+      return { averagePrice: 0, budgetCount: 0, topRated: "-" };
+    }
+
+    const averagePrice = Math.round(
+      products.reduce((sum, product) => sum + product.priceInr, 0) / products.length
+    );
+    const budgetCount = products.filter((product) => product.priceInr <= 3000).length;
+    const topRated =
+      [...products].sort((a, b) => b.rating.rate - a.rating.rate)[0]?.title || "-";
+
+    return { averagePrice, budgetCount, topRated };
+  }, [products]);
+
+  const statusLine = useMemo(
+    () => `${products.length} products${isLoadingProducts ? " - loading" : ""}`,
+    [isLoadingProducts, products.length]
+  );
+
+  const recentHistory = useMemo(() => history.slice(0, 4), [history]);
+
+  const placeOrder = async ({ form, summary }) => {
+    try {
+      const result =
+        form.paymentMethod === "upi"
+          ? await completeRazorpayUpiCheckout({ form, summary })
+          : await completeCheckout({ customerName: form.fullName });
+
+      appendHistory(
+        "checkout",
+        `Order placed. Amount paid: Rs ${Number(result.paidAmount).toLocaleString("en-IN")}.`
+      );
+    } catch {
+      // Error already surfaced in checkout UI.
+    }
+  };
+
+  const openCheckoutView = useCallback(() => {
+    if (!cart.count) {
+      return;
+    }
+
+    setOrderResult(null);
+    setCheckoutError("");
+    setActiveView("checkout");
+  }, [cart.count]);
+
+  const voiceControlProps = {
+    supported,
+    isListening,
+    assistantAwake,
+    interimText,
+    recognizedText,
+    error,
+    continuous,
+    forceFallback,
+    quickCommands: QUICK_COMMANDS,
+    onToggleContinuous: () => setContinuous((prev) => !prev),
+    onToggleListening: toggleListening,
+    onRunManualCommand: runManualCommand,
+    onTranscribeAudio: async ({ audioBase64, mimeType }) =>
+      (await api.transcribeAudio({ audioBase64, mimeType })).text
+  };
+
+  return (
+    <main
+      className={`app-shell ${mobileOpen ? "nav-open" : ""} ${
+        aiActivity?.kind === "search" && aiActivity?.stage === "searching" ? "ai-shake" : ""
+      }`}
+    >
+      <div className="app-layout">
+        <Navbar
+          items={NAV_ITEMS}
+          activeView={activeView}
+          onChangeView={(view) => {
+            setActiveView(view);
+            setMobileOpen(false);
+          }}
+          usingDemoData={usingDemoData}
+          cartCount={cart.count}
+          commandCount={history.length}
+          mobileOpen={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+        />
+
+        <section className="main-content">
+          <div className="topbar glass">
+            <button className="menu-btn" onClick={() => setMobileOpen((prev) => !prev)}>
+              Menu
+            </button>
+
+            <div className="topbar-copy">
+              <strong>Data source</strong>
+              <p>{usingDemoData ? "Using backup demo data" : "Connected to live data"}</p>
+            </div>
+
+            <div className="topbar-right">
+              <span className="topbar-status">{usingDemoData ? "Backup catalog" : "Live catalog"}</span>
+              {currentUser ? (
+                <div className="auth-user-chip">
+                  <span>{currentUser.email || "Signed in"}</span>
+                  <button type="button" className="theme-btn" onClick={onLogout}>
+                    Logout
+                  </button>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                className="theme-btn"
+                onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+              >
+                {theme === "dark" ? "Light" : "Dark"}
+              </button>
+            </div>
+          </div>
+
+          <Header
+            lastCategory={lastCategory}
+            productCount={products.length}
+            cartCount={cart.count}
+            isListening={isListening}
+            recognizedText={recognizedText}
+            aiAssistantMode={settings.aiAssistantMode}
+          />
+
+          {activeView === "overview" ? (
+            <>
+              <section className="simple-grid">
+                <article className="glass summary-card">
+                  <span>Total products</span>
+                  <strong>{products.length}</strong>
+                  <p>{usingDemoData ? "Backup catalog active" : "Live catalog loaded"}</p>
+                </article>
+                <article className="glass summary-card">
+                  <span>Cart total</span>
+                  <strong>Rs {cart.total.toLocaleString("en-IN")}</strong>
+                  <p>{cart.count ? `${cart.count} item(s) selected` : "Cart is empty"}</p>
+                </article>
+                <article className="glass summary-card">
+                  <span>Recent commands</span>
+                  <strong>{history.length}</strong>
+                  <p>{recognizedText || "No command used yet"}</p>
+                </article>
+              </section>
+
