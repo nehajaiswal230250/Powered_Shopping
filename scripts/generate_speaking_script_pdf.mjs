@@ -198,3 +198,172 @@ const drawParagraph = (text) => {
     drawText({
       text: line,
       x: MARGIN_X + 4,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 3;
+};
+
+const drawBullet = (text) => {
+  const bulletX = MARGIN_X + 8;
+  const textX = MARGIN_X + 22;
+  const lines = wrapText(text, BODY_WIDTH - 30, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+  drawRect(bulletX, y - 8, 5, 5, COLORS.teal);
+  drawText({
+    text: lines[0],
+    x: textX,
+    yTop: y,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.text
+  });
+  y += 15;
+  for (let i = 1; i < lines.length; i += 1) {
+    drawText({
+      text: lines[i],
+      x: textX,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 2;
+};
+
+addPage("cover");
+drawRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, COLORS.navy);
+drawRect(0, 0, PAGE_WIDTH, 12, COLORS.teal);
+drawRect(0, PAGE_HEIGHT - 30, PAGE_WIDTH, 30, COLORS.amber);
+drawRect(MARGIN_X, 176, 140, 30, COLORS.teal);
+drawRect(MARGIN_X, 220, PAGE_WIDTH - MARGIN_X * 2, 2, COLORS.teal);
+
+const titleToken = tokens.find((t) => t.type === "doc-title");
+const titleText = titleToken?.text || "Powered Shopping";
+
+drawText({
+  text: titleText,
+  x: MARGIN_X,
+  yTop: 258,
+  size: 29,
+  font: FONT_BOLD,
+  rgb: COLORS.white
+});
+
+drawText({
+  text: "5-Minute Speaking Script",
+  x: MARGIN_X + 14,
+  yTop: 196,
+  size: 11,
+  font: FONT_BOLD,
+  rgb: COLORS.white
+});
+
+drawText({
+  text: "Practice document for classroom explanation",
+  x: MARGIN_X,
+  yTop: 296,
+  size: 18,
+  font: FONT_REGULAR,
+  rgb: COLORS.white
+});
+
+let coverMetaY = 350;
+for (const token of tokens) {
+  if (token.type !== "meta") continue;
+  drawText({
+    text: token.text,
+    x: MARGIN_X,
+    yTop: coverMetaY,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.white
+  });
+  coverMetaY += 18;
+}
+
+drawText({
+  text: "Generated automatically from the current presentation flow",
+  x: MARGIN_X,
+  yTop: PAGE_HEIGHT - 66,
+  size: 10,
+  font: FONT_REGULAR,
+  rgb: COLORS.navy
+});
+
+addPage("content");
+
+for (const section of sections) {
+  drawSectionTitle(section.title);
+  for (const item of section.items) {
+    if (item.type === "space") {
+      y += 8;
+      continue;
+    }
+    if (item.type === "paragraph") {
+      drawParagraph(item.text);
+      continue;
+    }
+    if (item.type === "bullet") {
+      drawBullet(item.text);
+    }
+  }
+  y += 10;
+}
+
+const objects = [];
+const addObject = (content) => {
+  objects.push(content);
+  return objects.length;
+};
+
+const fontRegularId = addObject(
+  "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
+);
+const fontBoldId = addObject(
+  "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>"
+);
+const pagesId = addObject("");
+const pageObjectIds = [];
+
+for (const page of pages) {
+  const streamContent = page.commands.join("\n");
+  const contentId = addObject(
+    `<< /Length ${Buffer.byteLength(streamContent, "utf8")} >>\nstream\n${streamContent}\nendstream`
+  );
+  const pageId = addObject(
+    `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /${FONT_REGULAR} ${fontRegularId} 0 R /${FONT_BOLD} ${fontBoldId} 0 R >> >> /Contents ${contentId} 0 R >>`
+  );
+  pageObjectIds.push(pageId);
+}
+
+objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageObjectIds
+  .map((id) => `${id} 0 R`)
+  .join(" ")}] /Count ${pageObjectIds.length} >>`;
+
+const catalogId = addObject(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+
+let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+const offsets = [0];
+
+for (let i = 0; i < objects.length; i += 1) {
+  offsets.push(Buffer.byteLength(pdf, "binary"));
+  pdf += `${i + 1} 0 obj\n${objects[i]}\nendobj\n`;
+}
+
+const xrefStart = Buffer.byteLength(pdf, "binary");
+pdf += `xref\n0 ${objects.length + 1}\n`;
+pdf += "0000000000 65535 f \n";
+for (let i = 1; i <= objects.length; i += 1) {
+  pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+}
+pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+
+fs.writeFileSync(OUTPUT_FILE, pdf, "binary");
+console.log(`Created ${OUTPUT_FILE} (${pages.length} pages).`);
