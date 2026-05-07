@@ -55,4 +55,206 @@ T*
 T*
 (1.  Open app and sign in \(Email/Password or Google\).) Tj
 T*
-(2.  Land on dashboard with navigation menu and live status
+(2.  Land on dashboard with navigation menu and live status chips.) Tj
+T*
+(3.  Browse products in Shop view or use Voice Copilot.) Tj
+T*
+(4.  Add items to cart from product cards or commands.) Tj
+T*
+(5.  Open Checkout and complete 3-step flow.) Tj
+T*
+(6.  Place order and continue shopping.) Tj
+T*
+() Tj
+T*
+(3. LOGIN SCREEN \(AUTH\)) Tj
+T*
+() Tj
+T*
+(What user sees:) Tj
+T*
+(-  Login/Sign Up tabs) Tj
+T*
+(-  Email and Password fields) Tj
+T*
+(-  Continue with Google button) Tj
+T*
+(-  Theme toggle \(Light/Dark\)) Tj
+T*
+() Tj
+T*
+(How user interacts:) Tj
+T*
+(-  Choose `Login` if account exists, or `Sign Up` for new account.) Tj
+T*
+(-  Enter credentials and submit.) Tj
+T*
+(-  On success, dashboard opens.) Tj
+T*
+(-  On failure, error message appears on same screen.) Tj
+T*
+() Tj
+T*
+(4. MAIN DASHBOARD LAYOUT) Tj
+T*
+() Tj
+T*
+(After login, the interface has these zones:) Tj
+T*
+(-  Left sidebar navigation) Tj
+T*
+(-  Top status bar) Tj
+T*
+(-  Main content area \(changes by selected view\)) Tj
+T*
+(-  Optional floating buttons \(`AI` and `Mic`\)) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 1377 >>
+stream
+BT
+/F1 10 Tf
+14 TL
+50 742 Td
+(SIDEBAR MENU OPTIONS) Tj
+T*
+() Tj
+T*
+(-  Mission Control \(overview\)) Tj
+T*
+(-  Catalog AI \(shopping view\)) Tj
+T*
+(-  Cart Queue) Tj
+T*
+(-  Checkout) Tj
+T*
+(-  Voice Copilot) Tj
+T*
+(-  System \(settings\)) Tj
+T*
+(-  Help \(FAQ\)) Tj
+T*
+() Tj
+T*
+(LIVE STATUS INDICATORS USERS WILL NOTICE) Tj
+T*
+() Tj
+T*
+(-  Catalog Mode: `Live` or `Backup`) Tj
+T*
+(-  Cart Items count) Tj
+T*
+(-  Commands count) Tj
+T*
+(-  Mic state: `Mic Live` or `Mic Idle`) Tj
+T*
+(-  AI mode: `Online` or `Fallback`) Tj
+T*
+() Tj
+T*
+(5. OVERVIEW \(MISSION CONTROL\)) Tj
+T*
+() Tj
+T*
+(Purpose:) Tj
+T*
+(-  Quick start experience for first-time users.) Tj
+T*
+() Tj
+T*
+(User actions available:) Tj
+T*
+(-  Start Shopping) Tj
+T*
+(-  Open Voice Assistant) Tj
+T*
+(-  Go to Checkout) Tj
+T*
+(-  Quick category buttons) Tj
+T*
+(-  One-click sample command buttons) Tj
+T*
+() Tj
+T*
+(This screen helps users begin without needing setup knowledge.) Tj
+T*
+() Tj
+T*
+(6. SHOP VIEW \(CATALOG AI\)) Tj
+T*
+() Tj
+T*
+(This is the primary browsing screen.) Tj
+T*
+() Tj
+T*
+(PRODUCT INTERACTION) Tj
+T*
+() Tj
+T*
+(Each product card shows:) Tj
+T*
+(-  image) Tj
+T*
+(-  name) Tj
+T*
+(-  category) Tj
+T*
+(-  INR price) Tj
+T*
+(-  rating) Tj
+T*
+(-  `Queue with AI` button) Tj
+T*
+() Tj
+T*
+(When user taps `Queue with AI`:) Tj
+T*
+(-  item is added to cart) Tj
+T*
+(-  cart count and total update immediately) Tj
+T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 1543 >>
+stream
+BT
+/F1 10 Tf
+14 TL
+50 742 Td
+() Tj
+T*
+(SMART FILTERS USERS CAN CONTROL) Tj
+T*
+() Tj
+T*
+(-  Search text) Tj
+T*
+(-  Category) Tj
+T*
+(-  Sort \(default / price low-high / price high-low / highest rated\)) Tj
+T*
+(-  Max price) Tj
+T*
+(-  Minimum rating) Tj
+T*
+() Tj
+T*
+(Buttons:) Tj
+T*
+(-  `Apply` runs current filter set) Tj
+T*
+(-  `Reset` c
