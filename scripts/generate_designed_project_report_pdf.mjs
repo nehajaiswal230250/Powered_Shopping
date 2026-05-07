@@ -198,3 +198,203 @@ const addPage = (kind = "content") => {
   drawHeader(pages.length);
   y = BODY_START_Y;
 };
+
+const ensureSpace = (heightNeeded) => {
+  const usableBottom = PAGE_HEIGHT - MARGIN_BOTTOM;
+  if (y + heightNeeded > usableBottom) {
+    addPage("content");
+  }
+};
+
+const drawSectionTitle = (title) => {
+  ensureSpace(34);
+  drawRect(MARGIN_X - 4, y - 17, BODY_WIDTH + 8, 26, COLORS.chip);
+  drawRect(MARGIN_X - 4, y - 17, 8, 26, COLORS.chipEdge);
+  drawText({
+    text: title,
+    x: MARGIN_X + 12,
+    yTop: y,
+    size: 13,
+    font: FONT_BOLD,
+    rgb: COLORS.navy
+  });
+  y += 30;
+};
+
+const drawSubheading = (text) => {
+  ensureSpace(24);
+  drawText({
+    text,
+    x: MARGIN_X + 4,
+    yTop: y,
+    size: 12,
+    font: FONT_BOLD,
+    rgb: COLORS.navySoft
+  });
+  y += 20;
+};
+
+const drawParagraph = (text) => {
+  const lines = wrapText(text, BODY_WIDTH - 8, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+  for (const line of lines) {
+    drawText({
+      text: line,
+      x: MARGIN_X + 4,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 3;
+};
+
+const drawBullet = (text) => {
+  const bulletX = MARGIN_X + 8;
+  const textX = MARGIN_X + 22;
+  const lines = wrapText(text, BODY_WIDTH - 30, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+
+  drawRect(bulletX, y - 8, 5, 5, COLORS.teal);
+
+  drawText({
+    text: lines[0],
+    x: textX,
+    yTop: y,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.text
+  });
+  y += 15;
+
+  for (let i = 1; i < lines.length; i += 1) {
+    drawText({
+      text: lines[i],
+      x: textX,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 2;
+};
+
+const drawNumbered = (index, text) => {
+  const prefix = `${index}.`;
+  const prefixWidth = textWidthApprox(prefix, 11, true) + 8;
+  const lines = wrapText(text, BODY_WIDTH - 8 - prefixWidth, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+
+  drawText({
+    text: prefix,
+    x: MARGIN_X + 4,
+    yTop: y,
+    size: 11,
+    font: FONT_BOLD,
+    rgb: COLORS.navy
+  });
+
+  drawText({
+    text: lines[0],
+    x: MARGIN_X + 4 + prefixWidth,
+    yTop: y,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.text
+  });
+  y += 15;
+
+  for (let i = 1; i < lines.length; i += 1) {
+    drawText({
+      text: lines[i],
+      x: MARGIN_X + 4 + prefixWidth,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 2;
+};
+
+addPage("cover");
+drawRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, COLORS.navy);
+drawRect(0, 0, PAGE_WIDTH, 12, COLORS.teal);
+drawRect(0, PAGE_HEIGHT - 30, PAGE_WIDTH, 30, COLORS.amber);
+drawRect(MARGIN_X, 168, 96, 30, COLORS.teal);
+drawRect(MARGIN_X, 212, PAGE_WIDTH - MARGIN_X * 2, 2, COLORS.teal);
+
+const titleToken = tokens.find((t) => t.type === "doc-title");
+const titleText = titleToken?.text || "Powered Shopping";
+
+drawText({
+  text: titleText,
+  x: MARGIN_X,
+  yTop: 250,
+  size: 30,
+  font: FONT_BOLD,
+  rgb: COLORS.white
+});
+
+drawText({
+  text: "AI-Driven Voice Shopping Assistant",
+  x: MARGIN_X,
+  yTop: 288,
+  size: 18,
+  font: FONT_REGULAR,
+  rgb: COLORS.white
+});
+
+drawText({
+  text: "Project Report",
+  x: MARGIN_X + 14,
+  yTop: 188,
+  size: 11,
+  font: FONT_BOLD,
+  rgb: COLORS.white
+});
+
+let coverMetaY = 348;
+for (const token of tokens) {
+  if (token.type !== "meta") continue;
+  drawText({
+    text: token.text,
+    x: MARGIN_X,
+    yTop: coverMetaY,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.white
+  });
+  coverMetaY += 18;
+}
+
+drawText({
+  text: "Designed submission version generated automatically",
+  x: MARGIN_X,
+  yTop: PAGE_HEIGHT - 66,
+  size: 10,
+  font: FONT_REGULAR,
+  rgb: COLORS.navy
+});
+
+addPage("content");
+
+for (const section of sections) {
+  drawSectionTitle(section.title);
+  for (const item of section.items) {
+    if (item.type === "space") {
+      y += 8;
+      continue;
+    }
+    if (item.type === "subheading") {
+      drawSubheading(item.text);
+      continue;
+    }
+    if (item.type === "paragraph") {
+      drawParagraph(item.text);
+      continue;
