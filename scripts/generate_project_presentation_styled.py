@@ -598,3 +598,203 @@ def build_process_slide() -> SlideBuilder:
         "02  Frontend captures the request and sends it forward",
         "03  Backend routes it to product, cart, or AI services",
         "04  AI tools or fallback parser decide the correct action",
+        "05  UI updates products, cart, recommendations, or checkout state",
+    ]
+    for idx, line in enumerate(lines):
+        slide.add_shape(
+            x=inches(0.9),
+            y=inches(1.95 + idx * 0.82),
+            w=inches(4.0),
+            h=inches(0.48),
+            fill=COLORS["blue_soft"] if idx % 2 == 0 else COLORS["paper_warm"],
+            line=None,
+            geom="roundRect",
+            text=[line],
+            font="Calibri",
+            size=1400,
+            color=COLORS["ink"],
+            bold=idx == 0,
+            valign="ctr",
+            inset=(inches(0.12), 0, inches(0.08), 0),
+            name=f"Stage {idx+1}",
+        )
+    slide.add_shape(
+        x=inches(0.92),
+        y=inches(5.95),
+        w=inches(3.8),
+        h=inches(0.3),
+        fill=None,
+        line=None,
+        text=["Process-style visual adapted from the uploaded INT428 manual."],
+        font="Calibri",
+        size=1100,
+        color=COLORS["muted"],
+        txbox=True,
+        name="Note",
+    )
+    slide.add_shape(
+        x=inches(5.8),
+        y=inches(1.3),
+        w=inches(6.25),
+        h=inches(5.35),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Image Frame",
+    )
+    slide.add_picture(
+        "process",
+        x=inches(6.05),
+        y=inches(1.55),
+        w=inches(5.75),
+        h=inches(4.95),
+        name="INT428 Process Flow",
+    )
+    add_footer(slide, "04")
+    return slide
+
+
+def build_architecture_slide() -> SlideBuilder:
+    slide = SlideBuilder("Architecture")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper_warm"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.7),
+        w=inches(4.2),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["System architecture and technology roles"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    columns = [
+        ("CLIENT", COLORS["navy"], ["React + Vite interface", "Speech hooks + UI state", "Firebase authentication"]),
+        ("BACKEND", COLORS["teal"], ["Express APIs", "Controllers + services", "Cart, product, and AI logic"]),
+        ("AI LAYER", COLORS["pink"], ["OpenAI chat + tool calling", "Whisper transcription", "Intent parser fallback"]),
+        ("DATA", COLORS["green"], ["FakeStore + mock JSON", "Firestore or memory cart", "Browser storage preferences"]),
+    ]
+    for idx, (label, color, lines) in enumerate(columns):
+        x = 0.62 + idx * 3.13
+        slide.add_shape(
+            x=inches(x),
+            y=inches(1.65),
+            w=inches(2.75),
+            h=inches(4.45),
+            fill=COLORS["white"],
+            line=COLORS["blue_line"],
+            geom="roundRect",
+            name=f"Column {idx+1}",
+        )
+        slide.add_shape(
+            x=inches(x + 0.18),
+            y=inches(1.88),
+            w=inches(1.38),
+            h=inches(0.4),
+            fill=color,
+            geom="roundRect",
+            line=None,
+            text=[label],
+            font="Calibri",
+            size=1150,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"Column Label {idx+1}",
+        )
+        for line_idx, line in enumerate(lines):
+            slide.add_shape(
+                x=inches(x + 0.18),
+                y=inches(2.55 + line_idx * 0.92),
+                w=inches(2.35),
+                h=inches(0.62),
+                fill=COLORS["blue_soft"] if line_idx != 1 else COLORS["paper_warm"],
+                line=None,
+                geom="roundRect",
+                text=[line],
+                font="Calibri",
+                size=1250,
+                color=COLORS["ink"],
+                valign="ctr",
+                inset=(inches(0.1), 0, inches(0.08), 0),
+                name=f"Column {idx+1} Item {line_idx+1}",
+            )
+        if idx < 3:
+            slide.add_shape(
+                x=inches(x + 2.78),
+                y=inches(3.35),
+                w=inches(0.22),
+                h=inches(0.12),
+                fill=COLORS["slate"],
+                line=None,
+                name=f"Arrow Line {idx+1}",
+            )
+            slide.add_shape(
+                x=inches(x + 2.97),
+                y=inches(3.27),
+                w=inches(0.16),
+                h=inches(0.28),
+                fill=COLORS["slate"],
+                line=None,
+                geom="chevron",
+                name=f"Arrow Head {idx+1}",
+            )
+    add_footer(slide, "05")
+    return slide
+
+
+def build_features_slide() -> SlideBuilder:
+    slide = SlideBuilder("Features")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.72),
+        w=inches(3.6),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["Main features"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    cards = [
+        ("Secure access", COLORS["orange"], "Users enter through Firebase login before reaching the dashboard."),
+        ("Voice commands", COLORS["teal"], "Start listening, use continuous mode, and hear spoken replies."),
+        ("Manual control", COLORS["navy"], "Typed prompts and quick commands make the demo easy to drive."),
+        ("Smart discovery", COLORS["pink"], "Search, filter, and request trending or similar products."),
+        ("Cart flow", COLORS["green"], "Add items, remove items, track totals, and simulate checkout."),
+        ("Recovery mode", COLORS["slate"], "Fallbacks keep the app usable during network or service failure."),
+    ]
+    for idx, (title, color, body) in enumerate(cards):
+        col = idx % 3
+        row = idx // 3
+        x = 0.72 + col * 4.15
+        y = 1.65 + row * 2.2
+        slide.add_shape(
+            x=inches(x),
+            y=inches(y),
+            w=inches(3.62),
+            h=inches(1.68),
+            fill=COLORS["white"],
+            line=COLORS["blue_line"],
+            geom="roundRect",
+            name=f"Feature Card {idx+1}",
+        )
+        slide.add_shape(
+            x=inches(x + 0.18),
+            y=inches(y + 0.18),
+            w=inches(1.22),
+            h=inches(0.38),
+            fill=color,
+            line=None,
+            geom="roundRect",
