@@ -498,3 +498,203 @@ export default function HomePage({ currentUser, onLogout }) {
       }
 
       const uniqueProducts = [
+        ...new Map([...products, ...DEMO_PRODUCTS].map((item) => [item.id, item])).values()
+      ];
+
+      const scoredMatches = uniqueProducts
+        .map((item) => ({
+          item,
+          score: scoreProductMatch(item, intent.itemName)
+        }))
+        .filter((entry) => entry.score > 0)
+        .sort(
+          (a, b) =>
+            b.score - a.score ||
+            (b.item.rating?.rate || 0) - (a.item.rating?.rate || 0) ||
+            a.item.priceInr - b.item.priceInr
+        );
+
+      return scoredMatches[0]?.item || null;
+    },
+    [products]
+  );
+
+  const removeFromCart = useCallback(
+    async (productId) => {
+      setOrderResult(null);
+
+      try {
+        const response = await api.removeFromCart({ productId });
+        setCart({ items: response.items, total: response.total, count: response.count });
+        setUsingDemoData(false);
+      } catch {
+        setUsingDemoData(true);
+        setCart((prev) => normalizeCart(prev.items.filter((item) => item.product.id !== productId)));
+      }
+
+      if (settings.voiceReplies) {
+        speak("Item removed from cart.");
+      }
+    },
+    [settings.voiceReplies, speak]
+  );
+
+  const completeCheckout = useCallback(
+    async ({ customerName } = {}) => {
+      setIsCheckoutProcessing(true);
+      setCheckoutError("");
+      const shippingFee = cart.total > 4999 ? 0 : 199;
+      const taxAmount = Math.round(cart.total * 0.05);
+      const payable = cart.total + shippingFee + taxAmount;
+
+      try {
+        const response = await api.checkout();
+        setCart(EMPTY_CART);
+        setCheckoutForm((prev) => ({ ...CHECKOUT_FORM_DEFAULTS, email: prev.email }));
+        setOrderResult({
+          orderId: response.orderId || `ORD-${Date.now().toString().slice(-8)}`,
+          paidAmount: response.paidAmount,
+          customerName: customerName || ""
+        });
+        setUsingDemoData(false);
+        if (settings.voiceReplies) {
+          speak(`Checkout complete. Your total was ${response.paidAmount} rupees.`);
+        }
+        return response;
+      } catch {
+        setCheckoutError("");
+        setUsingDemoData(true);
+        const paidAmount = payable;
+        setCart(EMPTY_CART);
+        setCheckoutForm((prev) => ({ ...CHECKOUT_FORM_DEFAULTS, email: prev.email }));
+        const backupResult = {
+          orderId: `ORD-${Date.now().toString().slice(-8)}`,
+          paidAmount,
+          customerName: customerName || ""
+        };
+        setOrderResult(backupResult);
+        if (settings.voiceReplies) {
+          speak(`Checkout completed in backup mode. Your total was ${paidAmount} rupees.`);
+        }
+        return backupResult;
+      } finally {
+        setIsCheckoutProcessing(false);
+      }
+    },
+    [cart.total, settings.voiceReplies, speak]
+  );
+
+  const completeRazorpayUpiCheckout = useCallback(
+    async ({ form, summary }) => {
+      setIsCheckoutProcessing(true);
+      setCheckoutError("");
+
+      try {
+        const Razorpay = await loadRazorpayScript();
+        const order = await api.createRazorpayOrder({
+          customerName: form.fullName,
+          email: form.email,
+          phone: form.phone
+        });
+
+        const verificationResult = await new Promise((resolve, reject) => {
+          let settled = false;
+
+          const instance = new Razorpay({
+            key: order.keyId,
+            order_id: order.orderId,
+            amount: order.amount,
+            currency: order.currency,
+            name: "Prisma Shop",
+            description: "UPI checkout",
+            method: {
+              upi: true,
+              card: false,
+              netbanking: false,
+              wallet: false,
+              emi: false,
+              paylater: false
+            },
+            prefill: {
+              name: form.fullName,
+              email: form.email,
+              contact: form.phone
+            },
+            notes: {
+              address: [form.address, form.city, form.zip].filter(Boolean).join(", ")
+            },
+            theme: {
+              color: "#f15464"
+            },
+            modal: {
+              ondismiss: () => {
+                if (!settled) {
+                  settled = true;
+                  reject(new Error("Razorpay checkout was closed before payment completed."));
+                }
+              }
+            },
+            handler: async (response) => {
+              try {
+                const verified = await api.verifyRazorpayPayment({
+                  ...response,
+                  customerName: form.fullName
+                });
+                if (!settled) {
+                  settled = true;
+                  resolve(verified);
+                }
+              } catch (error) {
+                if (!settled) {
+                  settled = true;
+                  reject(error);
+                }
+              }
+            }
+          });
+
+          instance.open();
+        });
+
+        setCart(EMPTY_CART);
+        setCheckoutForm((prev) => ({ ...CHECKOUT_FORM_DEFAULTS, email: prev.email }));
+        setOrderResult({
+          orderId: verificationResult.orderId,
+          paidAmount: verificationResult.paidAmount || summary.payable,
+          customerName: form.fullName
+        });
+        setUsingDemoData(false);
+
+        if (settings.voiceReplies) {
+          speak(`UPI payment complete. Your total was ${verificationResult.paidAmount} rupees.`);
+        }
+
+        return verificationResult;
+      } catch (error) {
+        const message = error?.message || "Failed to complete Razorpay UPI payment.";
+        setCheckoutError(
+          /Razorpay is not configured/i.test(message)
+            ? `${message} Then restart the server and try the payment again.`
+            : /Failed to create Razorpay order/i.test(message)
+              ? `${message} Check that your server has valid Razorpay keys and working internet access.`
+            : message
+        );
+        throw error;
+      } finally {
+        setIsCheckoutProcessing(false);
+      }
+    },
+    [settings.voiceReplies, speak]
+  );
+
+  const openAssistant = useCallback(() => {
+    setAssistantAwake(true);
+    setActiveView("assistant");
+    setShouldAutoStartMic(true);
+  }, []);
+
+  const runManualCommand = useCallback(
+    async (input) => {
+      const text = input.trim();
+      if (!text) {
+        return;
