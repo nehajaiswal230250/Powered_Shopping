@@ -698,3 +698,203 @@ export default function HomePage({ currentUser, onLogout }) {
       const text = input.trim();
       if (!text) {
         return;
+      }
+
+      setRecognizedText(text);
+      const intent = detectIntent(text);
+
+      try {
+        if (intent.wake) {
+          openAssistant();
+        }
+
+        if (intent.type === "WAKE_MIC") {
+          openAssistant();
+          replyToUser(
+            text,
+            assistantAwake ? "Mike is already awake. Say your shopping command." : "Mike is awake. Say your shopping command."
+          );
+          return;
+        }
+
+        if (intent.type === "GREETING") {
+          replyToUser(
+            text,
+            assistantAwake
+              ? "Hi! Tell me what to shop for, like “show Nike shoes under 2000”."
+              : "Hi! Say “hello Mike” to wake me, or tell me what to shop for."
+          );
+          return;
+        }
+
+        if (intent.type === "SEARCH") {
+          const params = {};
+          if (intent.query) params.q = intent.query;
+          if (intent.category) params.category = intent.category;
+          if (intent.brand) params.brand = intent.brand;
+          if (intent.maxPrice) params.maxPrice = intent.maxPrice;
+          if (intent.minRating) params.minRating = intent.minRating;
+          if (intent.sort) params.sort = intent.sort;
+
+          const chips = buildChipsFromIntent(intent);
+          startAiTask({
+            stage: "searching",
+            command: text,
+            detail: "Filtering products and ranking matches…",
+            chips
+          });
+
+          const found = await loadProducts(params);
+
+          if (intent.query) {
+            setFilters((prev) => ({ ...prev, q: intent.query }));
+          }
+          if (intent.category) {
+            setLastCategory(intent.category);
+            writeStoredValue(LAST_CATEGORY_KEY, intent.category);
+            setFilters((prev) => ({ ...prev, category: intent.category }));
+          }
+          if (intent.brand) {
+            setFilters((prev) => ({ ...prev, brand: intent.brand }));
+          }
+          if (intent.maxPrice) {
+            setFilters((prev) => ({ ...prev, maxPrice: String(intent.maxPrice) }));
+          }
+          if (intent.minRating) {
+            setFilters((prev) => ({ ...prev, minRating: String(intent.minRating) }));
+          }
+          if (intent.sort) {
+            setFilters((prev) => ({ ...prev, sort: intent.sort }));
+          }
+
+          setActiveView("shop");
+
+          if (found.length) {
+            const focusProduct = pickFocusProduct(found, text);
+            if (focusProduct?.id) {
+              setAiActivity({
+                kind: "search",
+                stage: "scrolling",
+                command: text,
+                detail: `Scrolling to: ${focusProduct.title}`,
+                chips
+              });
+              setAiFocusProductId(focusProduct.id);
+              scheduleAiTimer(() => setAiFocusProductId(null), 2600);
+              scheduleAiTimer(() => setAiActivity(null), 2300);
+            } else {
+              setAiActivity({ kind: "search", stage: "done", command: text, detail: "Results ready.", chips });
+              scheduleAiTimer(() => setAiActivity(null), 1400);
+            }
+          } else {
+            setAiActivity({ kind: "search", stage: "done", command: text, detail: "No matches found.", chips });
+            scheduleAiTimer(() => setAiActivity(null), 1500);
+          }
+
+          replyToUser(
+            text,
+            found.length
+              ? `Found ${found.length} matching product${found.length > 1 ? "s" : ""}.`
+              : "No matching products found."
+          );
+          return;
+        }
+
+        if (intent.type === "TRENDING") {
+          await loadRecommendations({ type: "trending" });
+          replyToUser(text, "Showing recommended products.");
+          return;
+        }
+
+        if (intent.type === "SIMILAR") {
+          if (!lastCategory) {
+            replyToUser(text, "Search a category first so I know what to compare.");
+            return;
+          }
+
+          try {
+            const response = await api.getRecommendations({ type: "similar", category: lastCategory });
+            setProducts(response.items);
+            setUsingDemoData(false);
+          } catch {
+            setProducts(filterDemoProducts({ category: lastCategory }));
+            setUsingDemoData(true);
+          }
+
+          setActiveView("shop");
+          replyToUser(text, `Showing products in ${lastCategory}.`);
+          return;
+        }
+
+        if (intent.type === "ADD") {
+          const product = resolveProductFromCommand(intent);
+
+          if (!product) {
+            replyToUser(
+              text,
+              "I could not identify which item to add. Try saying the product name, like add Nike SwiftLite Street Shoe to cart."
+            );
+            return;
+          }
+
+          await addToCart(product.id, text);
+          return;
+        }
+
+        if (intent.type === "REMOVE") {
+          if (!intent.itemName) {
+            replyToUser(text, "Please say the product name to remove.");
+            return;
+          }
+
+          try {
+            const response = await api.removeFromCart({ titleQuery: intent.itemName });
+            setCart({ items: response.items, total: response.total, count: response.count });
+            setUsingDemoData(false);
+          } catch {
+            setUsingDemoData(true);
+            setCart((prev) =>
+              normalizeCart(
+                prev.items.filter(
+                  (item) => !item.product.title.toLowerCase().includes(intent.itemName.toLowerCase())
+                )
+              )
+            );
+          }
+
+          replyToUser(text, "Item removed from cart.");
+          return;
+        }
+
+        if (intent.type === "CHECKOUT") {
+          if (!cart.count) {
+            replyToUser(text, "Your cart is empty.");
+            return;
+          }
+
+          setActiveView("checkout");
+          replyToUser(text, "Checkout is ready.");
+          return;
+        }
+
+        if (intent.type === "HELP") {
+          replyToUser(
+            text,
+            "Try commands like show shoes under 2000, add first item, remove item, or checkout now."
+          );
+          return;
+        }
+
+        if (settings.aiAssistantMode) {
+          try {
+            const aiHistory = history
+              .slice(0, 6)
+              .reverse()
+              .flatMap((entry) => [
+                { role: "user", content: entry.command },
+                { role: "assistant", content: entry.response }
+              ]);
+
+            const intentGuess = detectIntent(text);
+            const shouldShowSearchFx = intentGuess?.type === "SEARCH";
+            if (shouldShowSearchFx) {
