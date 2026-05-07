@@ -198,3 +198,203 @@ class SlideBuilder:
             XML_HEADER
             + "<p:sld xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" "
             + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" "
+            + "xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\">"
+            + "<p:cSld><p:spTree>"
+            + "<p:nvGrpSpPr><p:cNvPr id=\"1\" name=\"\"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>"
+            + "<p:grpSpPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/>"
+            + "<a:chOff x=\"0\" y=\"0\"/><a:chExt cx=\"0\" cy=\"0\"/></a:xfrm></p:grpSpPr>"
+            + "".join(self.shape_xml)
+            + "".join(picture_xml_parts)
+            + "</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>"
+        )
+        rels_xml = (
+            XML_HEADER
+            + "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
+            + "".join(rels)
+            + "</Relationships>"
+        )
+        return slide_xml, rels_xml
+
+
+def media_registry() -> dict[str, str]:
+    return {
+        "process": "image1.png",
+        "desktop": "image2.png",
+        "mobile": "image3.png",
+    }
+
+
+def add_footer(slide: SlideBuilder, number: str) -> None:
+    slide.add_shape(
+        x=inches(0.45),
+        y=inches(7.02),
+        w=inches(2.5),
+        h=inches(0.26),
+        fill=None,
+        line=None,
+        text=[f"{number}  |  Powered Shopping  |  INT428 format"],
+        font="Calibri",
+        size=1100,
+        color=COLORS["muted"],
+        align="l",
+        txbox=True,
+        name="Footer",
+    )
+
+
+def build_cover() -> SlideBuilder:
+    slide = SlideBuilder("Cover")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper"], line=None, name="BG")
+    slide.add_shape(
+        x=0,
+        y=0,
+        w=inches(6.55),
+        h=SLIDE_H,
+        fill=COLORS["navy_dark"],
+        line=None,
+        name="Left Panel",
+    )
+    slide.add_shape(
+        x=inches(0.65),
+        y=inches(0.68),
+        w=inches(1.7),
+        h=inches(0.42),
+        fill=COLORS["orange"],
+        line=None,
+        geom="roundRect",
+        text=["CLASSROOM PRESENTATION"],
+        font="Calibri",
+        size=1250,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Label",
+    )
+    slide.add_shape(
+        x=inches(0.65),
+        y=inches(1.35),
+        w=inches(5.0),
+        h=inches(1.6),
+        fill=None,
+        line=None,
+        text=["Powered Shopping", "AI voice assistant for easier online shopping"],
+        font="Calibri Light",
+        size=2600,
+        color=COLORS["white"],
+        bold=True,
+        align="l",
+        txbox=True,
+        name="Title",
+    )
+    slide.add_shape(
+        x=inches(0.67),
+        y=inches(3.05),
+        w=inches(5.1),
+        h=inches(1.0),
+        fill=None,
+        line=None,
+        text=[
+            "This deck explains what the project does, how it works,",
+            "which technologies were used, and why the implementation matters.",
+        ],
+        font="Calibri",
+        size=1450,
+        color=COLORS["blue_soft"],
+        align="l",
+        txbox=True,
+        name="Subtitle",
+    )
+    for idx, label in enumerate(
+        ["Voice Search", "Smart Cart", "AI Assistant"]
+    ):
+        slide.add_shape(
+            x=inches(0.67 + idx * 1.72),
+            y=inches(5.75),
+            w=inches(1.52),
+            h=inches(0.52),
+            fill=COLORS["white"],
+            fill_alpha=12000,
+            line=COLORS["blue_line"],
+            geom="roundRect",
+            text=[label],
+            font="Calibri",
+            size=1200,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"Chip {idx+1}",
+        )
+    slide.add_shape(
+        x=inches(7.0),
+        y=inches(0.7),
+        w=inches(5.6),
+        h=inches(5.8),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Screenshot Frame",
+    )
+    slide.add_picture(
+        "desktop",
+        x=inches(7.18),
+        y=inches(0.95),
+        w=inches(5.25),
+        h=inches(4.8),
+        name="Desktop UI",
+    )
+    slide.add_shape(
+        x=inches(7.2),
+        y=inches(5.95),
+        w=inches(5.1),
+        h=inches(0.42),
+        fill=None,
+        line=None,
+        text=["Live UI snapshot from the running project"],
+        font="Calibri",
+        size=1200,
+        color=COLORS["muted"],
+        align="ctr",
+        txbox=True,
+        name="Caption",
+    )
+    return slide
+
+
+def build_problem_slide() -> SlideBuilder:
+    slide = SlideBuilder("Problem Objective Novelty")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper_warm"], line=None, name="BG")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=inches(0.55), fill=COLORS["navy_dark"], line=None, name="Top Bar")
+    slide.add_shape(
+        x=inches(0.6),
+        y=inches(0.82),
+        w=inches(4.7),
+        h=inches(0.55),
+        fill=None,
+        line=None,
+        text=["Problem statement"],
+        font="Calibri Light",
+        size=2400,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    cards = [
+        ("PROBLEM", COLORS["orange"], "Traditional online shopping needs too many manual clicks, searches, and filters."),
+        ("PAIN POINT", COLORS["teal"], "Users must repeatedly type queries, compare products, and manage the cart manually."),
+        ("NEED", COLORS["pink"], "A smarter shopping system should understand natural voice or text commands."),
+        ("GOAL", COLORS["green"], "Make shopping faster, simpler, and more interactive through AI assistance."),
+    ]
+    positions = [(0.72, 1.7), (6.75, 1.7), (0.72, 4.0), (6.75, 4.0)]
+    for idx, ((label, color, text), (x, y)) in enumerate(zip(cards, positions), start=1):
+        slide.add_shape(
+            x=inches(x),
+            y=inches(y),
+            w=inches(5.1),
+            h=inches(1.7),
+            fill=COLORS["white"],
+            line=COLORS["blue_line"],
