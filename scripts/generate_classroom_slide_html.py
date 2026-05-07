@@ -398,3 +398,203 @@ html = f"""<!doctype html>
       gap: 24px;
       margin-top: 32px;
       align-items: start;
+    }}
+    .desktop-panel, .mobile-panel {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 24px;
+      padding: 16px;
+    }}
+    .desktop-panel img {{
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      border-radius: 16px;
+    }}
+    .mobile-panel img {{
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      border-radius: 16px;
+    }}
+    .screen-chips {{
+      display: flex;
+      gap: 16px;
+      margin-top: 18px;
+    }}
+    .screen-chip {{
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+    }}
+    .strengths-top {{
+      display: flex;
+      gap: 16px;
+      margin-top: 28px;
+    }}
+    .stat {{
+      flex: 1;
+      border-radius: 24px;
+      color: white;
+      padding: 18px 20px;
+      min-height: 108px;
+    }}
+    .stat .big {{
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+    }}
+    .stat .small {{
+      font-size: 18px;
+      margin-top: 8px;
+      font-weight: 600;
+    }}
+    .strength-list {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }}
+    .strength {{
+      background: white;
+      border: 2px solid #b9d2eb;
+      border-radius: 22px;
+      padding: 20px;
+      min-height: 165px;
+    }}
+    .strength .tag {{
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }}
+    .strength p {{
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.3;
+      font-weight: 600;
+    }}
+    .closing-right {{
+      position: absolute;
+      right: 72px;
+      top: 120px;
+      width: 330px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 26px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }}
+    .closing-pill {{
+      background: rgba(255,255,255,.12);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const slides = {json.dumps(slides)};
+    const params = new URLSearchParams(location.search);
+    const index = Math.max(0, Math.min(slides.length - 1, Number(params.get('slide') || '1') - 1));
+    const s = slides[index];
+    const app = document.getElementById('app');
+
+    const footer = `<div class="footer">${{String(index + 1).padStart(2, '0')}} | Powered Shopping | Classroom presentation</div>`;
+
+    if (s.type === 'cover') {{
+      app.innerHTML = `
+        <div class="slide dark">
+          <div class="label">${{s.label}}</div>
+          <h1>${{s.title}}</h1>
+          <div class="subtitle">${{s.subtitle}}</div>
+          <div class="chips">
+            <div class="chip">Voice Search</div>
+            <div class="chip">Smart Cart</div>
+            <div class="chip">AI Assistant</div>
+          </div>
+          <div class="screen-frame"><img src="${{s.desktop}}" /></div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'cards4') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="cards4">
+            ${{s.cards.map(c => `
+              <div class="card">
+                <div class="card-label" style="background:${{c[2]}}">${{c[0]}}</div>
+                <p>${{c[1]}}</p>
+              </div>`).join('')}}
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'twoColumns') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="two-col">
+            <div class="panel">
+              <div class="panel-title" style="background:#1e4e8c">${{s.leftTitle}}</div>
+              <div class="list">${{s.leftItems.map((item, i) => `<div class="list-item ${{i % 2 ? 'alt' : ''}}">${{item}}</div>`).join('')}}</div>
+            </div>
+            <div class="panel">
+              <div class="panel-title" style="background:#1fa6c7">${{s.rightTitle}}</div>
+              <div class="list">${{s.rightItems.map((item, i) => `<div class="list-item ${{i % 2 ? 'alt' : ''}}">${{item}}</div>`).join('')}}</div>
+            </div>
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'process') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="process-wrap">
+            <div class="process-steps">
+              ${{s.steps.map((item, i) => `<div class="step ${{i % 2 ? 'alt' : ''}}">${{item}}</div>`).join('')}}
+            </div>
+            <div class="process-image"><img src="${{s.process}}" /></div>
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'architecture') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="architecture">
+            ${{s.cols.map(col => `
+              <div class="col">
+                <div class="col-title" style="background:${{col[1]}}">${{col[0]}}</div>
+                ${{col[2].map(item => `<div class="col-item">${{item}}</div>`).join('')}}
+              </div>`).join('')}}
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'grid6') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="grid6">
+            ${{s.items.map(item => `
+              <div class="feature">
+                <div class="feature-title" style="background:${{item[2]}}">${{item[0]}}</div>
+                <p>${{item[1]}}</p>
+              </div>`).join('')}}
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'screens') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="screens">
