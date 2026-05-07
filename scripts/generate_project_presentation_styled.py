@@ -798,3 +798,203 @@ def build_features_slide() -> SlideBuilder:
             fill=color,
             line=None,
             geom="roundRect",
+            text=[title],
+            font="Calibri",
+            size=1120,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"Feature Label {idx+1}",
+        )
+        slide.add_shape(
+            x=inches(x + 0.2),
+            y=inches(y + 0.72),
+            w=inches(3.05),
+            h=inches(0.62),
+            fill=None,
+            line=None,
+            text=[body],
+            font="Calibri",
+            size=1320,
+            color=COLORS["ink"],
+            txbox=True,
+            name=f"Feature Body {idx+1}",
+        )
+    add_footer(slide, "06")
+    return slide
+
+
+def build_model_slide() -> SlideBuilder:
+    slide = SlideBuilder("Model Details")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper_warm"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.72),
+        w=inches(5.2),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["Technology stack and why I used it"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    slide.add_shape(
+        x=inches(0.7),
+        y=inches(1.65),
+        w=inches(5.7),
+        h=inches(4.9),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Left Panel",
+    )
+    slide.add_shape(
+        x=inches(6.6),
+        y=inches(1.65),
+        w=inches(5.7),
+        h=inches(4.9),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Right Panel",
+    )
+    left_lines = [
+        "React 18 + Vite 5 for the frontend interface",
+        "Node.js + Express 4 for REST APIs and business logic",
+        "Firebase Auth for email/password and Google sign-in",
+        "OpenAI gpt-4o-mini + whisper-1 for assistant features",
+        "FakeStore API + local mock JSON for product data",
+    ]
+    right_lines = [
+        "React + Vite made the UI fast to build and run locally",
+        "Express kept product, cart, and AI routes simple and modular",
+        "Firebase gave secure login without building auth from scratch",
+        "OpenAI let the assistant trigger real shopping actions with tools",
+        "Fallback data sources made the project safer for live demos",
+    ]
+    slide.add_shape(
+        x=inches(0.95),
+        y=inches(1.95),
+        w=inches(4.8),
+        h=inches(0.45),
+        fill=COLORS["navy"],
+        line=None,
+        geom="roundRect",
+        text=["CORE TECHNOLOGIES"],
+        font="Calibri",
+        size=1200,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Left Label",
+    )
+    slide.add_shape(
+        x=inches(6.85),
+        y=inches(1.95),
+        w=inches(4.8),
+        h=inches(0.45),
+        fill=COLORS["teal"],
+        line=None,
+        geom="roundRect",
+        text=["WHY THEY MATTER"],
+        font="Calibri",
+        size=1200,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Right Label",
+    )
+    for idx, line in enumerate(left_lines):
+        slide.add_shape(
+            x=inches(1.0),
+            y=inches(2.6 + idx * 0.7),
+            w=inches(4.85),
+            h=inches(0.45),
+            fill=COLORS["paper_warm"] if idx % 2 else COLORS["blue_soft"],
+            line=None,
+            geom="roundRect",
+            text=[line],
+            font="Calibri",
+            size=1280,
+            color=COLORS["ink"],
+            valign="ctr",
+            inset=(inches(0.1), 0, inches(0.08), 0),
+            name=f"Left Item {idx+1}",
+        )
+    for idx, line in enumerate(right_lines):
+        slide.add_shape(
+            x=inches(6.9),
+            y=inches(2.6 + idx * 0.7),
+            w=inches(4.85),
+            h=inches(0.45),
+            fill=COLORS["paper_warm"] if idx % 2 else COLORS["blue_soft"],
+            line=None,
+            geom="roundRect",
+            text=[line],
+            font="Calibri",
+            size=1280,
+            color=COLORS["ink"],
+            valign="ctr",
+            inset=(inches(0.1), 0, inches(0.08), 0),
+            name=f"Right Item {idx+1}",
+        )
+    add_footer(slide, "07")
+    return slide
+
+
+def build_ui_slide() -> SlideBuilder:
+    slide = SlideBuilder("UI")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.72),
+        w=inches(4.0),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["Application screens"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    slide.add_shape(
+        x=inches(0.72),
+        y=inches(1.45),
+        w=inches(8.0),
+        h=inches(4.95),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Desktop Frame",
+    )
+    slide.add_picture(
+        "desktop",
+        x=inches(0.92),
+        y=inches(1.7),
+        w=inches(7.6),
+        h=inches(4.45),
+        name="Desktop Screenshot",
+    )
+    slide.add_shape(
+        x=inches(8.95),
+        y=inches(2.05),
+        w=inches(2.18),
+        h=inches(4.25),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Mobile Frame",
+    )
