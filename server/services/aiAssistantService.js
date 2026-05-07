@@ -98,3 +98,103 @@ const toolSpec = [
     function: {
       name: "checkout",
       description: "Checkout current cart and return order result.",
+      parameters: {
+        type: "object",
+        properties: {
+          customerName: { type: "string" }
+        }
+      }
+    }
+  }
+];
+
+const toNumber = (value, fallback = null) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+const getChatModel = () => process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+const getTranscribeModel = () => process.env.OPENAI_TRANSCRIBE_MODEL || "whisper-1";
+const getGeminiTranscribeModel = () => process.env.GEMINI_TRANSCRIBE_MODEL || "gemini-2.5-flash";
+
+const summarizeProduct = (p) => ({
+  id: p.id,
+  title: p.title,
+  category: p.category,
+  brand: p.brand,
+  priceInr: p.priceInr,
+  rating: p.rating
+});
+
+const summarizeCart = (items = []) => ({
+  items,
+  total: items.reduce((sum, i) => sum + i.product.priceInr * i.quantity, 0),
+  count: items.reduce((sum, i) => sum + i.quantity, 0)
+});
+
+const createState = () => ({
+  products: null,
+  recommendations: null,
+  cart: null,
+  orderResult: null,
+  activeView: null,
+  lastCategory: null
+});
+
+const executeTool = async (name, args, context, state) => {
+  const cartId = context.cartId;
+
+  if (name === "search_products") {
+    const products = await getProducts();
+    const params = {
+      ...(args.q ? { q: String(args.q) } : {}),
+      ...(args.category ? { category: String(args.category) } : {}),
+      ...(args.brand ? { brand: String(args.brand) } : {}),
+      ...(toNumber(args.maxPrice) !== null ? { maxPrice: toNumber(args.maxPrice) } : {}),
+      ...(toNumber(args.minPrice) !== null ? { minPrice: toNumber(args.minPrice) } : {}),
+      ...(toNumber(args.minRating) !== null ? { minRating: toNumber(args.minRating) } : {}),
+      ...(args.sort ? { sort: String(args.sort) } : {})
+    };
+
+    const filtered = filterProducts(products, params);
+    state.products = filtered;
+    state.activeView = "shop";
+    if (args.category) {
+      state.lastCategory = String(args.category);
+    }
+
+    return {
+      success: true,
+      count: filtered.length,
+      items: filtered.slice(0, 12).map(summarizeProduct)
+    };
+  }
+
+  if (name === "get_recommendations") {
+    const products = await getProducts();
+    const type = args.type === "similar" ? "similar" : "trending";
+    const items =
+      type === "similar"
+        ? getSimilarProducts(products, args.category, toNumber(args.excludeId), 8)
+        : getTrendingProducts(products, 8);
+
+    state.recommendations = items;
+    if (type === "similar") {
+      state.products = items;
+      state.activeView = "shop";
+      if (args.category) {
+        state.lastCategory = String(args.category);
+      }
+    }
+
+    return {
+      success: true,
+      type,
+      count: items.length,
+      items: items.slice(0, 10).map(summarizeProduct)
+    };
+  }
+
+  if (name === "add_to_cart") {
+    const productId = toNumber(args.productId);
