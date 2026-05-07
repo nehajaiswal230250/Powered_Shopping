@@ -1198,3 +1198,203 @@ def build_evaluation_slide() -> SlideBuilder:
             y=inches(2.45 + idx * 0.82),
             w=inches(5.15),
             h=inches(0.52),
+            fill=COLORS["paper_warm"] if idx % 2 else COLORS["blue_soft"],
+            line=None,
+            geom="roundRect",
+            text=[item],
+            font="Calibri",
+            size=1300,
+            color=COLORS["ink"],
+            valign="ctr",
+            inset=(inches(0.1), 0, inches(0.08), 0),
+            name=f"Strength {idx+1}",
+        )
+    slide.add_shape(
+        x=inches(6.95),
+        y=inches(1.86),
+        w=inches(1.35),
+        h=inches(0.4),
+        fill=COLORS["amber"],
+        geom="roundRect",
+        line=None,
+        text=["WHAT IT PROVES"],
+        font="Calibri",
+        size=1120,
+        color=COLORS["ink"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Gaps Label",
+    )
+    gaps = [
+        "The project has secure authentication and clear user flow",
+        "The assistant is connected to real shopping actions, not only chat",
+        "Frontend and backend state stay synchronized during interactions",
+        "The application is complete enough for full end-to-end explanation",
+    ]
+    for idx, item in enumerate(gaps):
+        slide.add_shape(
+            x=inches(7.0),
+            y=inches(2.45 + idx * 0.82),
+            w=inches(4.7),
+            h=inches(0.52),
+            fill="FCEFE8" if idx % 2 == 0 else "FFF7E2",
+            line=None,
+            geom="roundRect",
+            text=[item],
+            font="Calibri",
+            size=1300,
+            color=COLORS["ink"],
+            valign="ctr",
+            inset=(inches(0.1), 0, inches(0.08), 0),
+            name=f"Gap {idx+1}",
+        )
+    add_footer(slide, "10")
+    return slide
+
+
+def build_close_slide() -> SlideBuilder:
+    slide = SlideBuilder("Close")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["navy_dark"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.8),
+        y=inches(0.88),
+        w=inches(2.1),
+        h=inches(0.45),
+        fill=COLORS["orange"],
+        geom="roundRect",
+        line=None,
+        text=["CONCLUSION"],
+        font="Calibri",
+        size=1200,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Close Label",
+    )
+    slide.add_shape(
+        x=inches(0.8),
+        y=inches(1.75),
+        w=inches(6.0),
+        h=inches(1.7),
+        fill=None,
+        line=None,
+        text=["Powered Shopping", "A smarter and more natural shopping experience"],
+        font="Calibri Light",
+        size=2650,
+        color=COLORS["white"],
+        bold=True,
+        txbox=True,
+        name="Close Title",
+    )
+    slide.add_shape(
+        x=inches(0.82),
+        y=inches(3.65),
+        w=inches(5.8),
+        h=inches(1.0),
+        fill=None,
+        line=None,
+        text=[
+            "This project combines AI, voice interaction, and full-stack development.",
+            "It shows how technology can improve shopping while staying reliable and demo-ready.",
+        ],
+        font="Calibri",
+        size=1500,
+        color=COLORS["blue_soft"],
+        txbox=True,
+        name="Close Subtitle",
+    )
+    slide.add_shape(
+        x=inches(8.1),
+        y=inches(1.2),
+        w=inches(3.4),
+        h=inches(3.9),
+        fill=COLORS["white"],
+        fill_alpha=14000,
+        line=COLORS["white"],
+        line_alpha=28000,
+        geom="roundRect",
+        name="Right Card",
+    )
+    right_lines = ["Questions", "Project flow", "Technology used", "Live demo", "Future scope"]
+    for idx, line in enumerate(right_lines):
+        slide.add_shape(
+            x=inches(8.45),
+            y=inches(1.6 + idx * 0.6),
+            w=inches(2.75),
+            h=inches(0.4),
+            fill=COLORS["white"],
+            fill_alpha=14000,
+            line=None,
+            geom="roundRect",
+            text=[line],
+            font="Calibri",
+            size=1320,
+            color=COLORS["white"],
+            bold=idx == 0,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"Close Item {idx+1}",
+        )
+    slide.add_shape(
+        x=inches(0.82),
+        y=inches(6.2),
+        w=inches(3.0),
+        h=inches(0.26),
+        fill=None,
+        line=None,
+        text=["Powered Shopping | Classroom presentation version"],
+        font="Calibri",
+        size=1100,
+        color=COLORS["blue_soft"],
+        txbox=True,
+        name="Footer",
+    )
+    return slide
+
+
+def build_slides() -> list[SlideBuilder]:
+    return [
+        build_cover(),
+        build_problem_slide(),
+        build_scope_slide(),
+        build_process_slide(),
+        build_architecture_slide(),
+        build_features_slide(),
+        build_model_slide(),
+        build_ui_slide(),
+        build_stack_slide(),
+        build_evaluation_slide(),
+        build_close_slide(),
+    ]
+
+
+def presentation_xml(slide_count: int) -> str:
+    slide_ids = "".join(
+        f"<p:sldId id=\"{256 + index}\" r:id=\"rId{3 + index}\"/>" for index in range(slide_count)
+    )
+    return (
+        XML_HEADER
+        + "<p:presentation xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" "
+        + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" "
+        + "xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\">"
+        + "<p:sldMasterIdLst><p:sldMasterId id=\"2147483648\" r:id=\"rId1\"/></p:sldMasterIdLst>"
+        + "<p:notesMasterIdLst><p:notesMasterId r:id=\"rId4\"/></p:notesMasterIdLst>"
+        + "<p:handoutMasterIdLst><p:handoutMasterId r:id=\"rId5\"/></p:handoutMasterIdLst>"
+        + f"<p:sldIdLst>{slide_ids}</p:sldIdLst>"
+        + f"<p:sldSz cx=\"{SLIDE_W}\" cy=\"{SLIDE_H}\"/>"
+        + "<p:notesSz cx=\"7103745\" cy=\"10234295\"/>"
+        + "<p:defaultTextStyle><a:defPPr><a:defRPr lang=\"en-US\"/></a:defPPr></p:defaultTextStyle>"
+        + "</p:presentation>"
+    )
+
+
+def presentation_rels_xml(slide_count: int) -> str:
+    slide_rels = "".join(
+        f"<Relationship Id=\"rId{3 + index}\" "
+        + "Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide\" "
+        + f"Target=\"slides/slide{index + 1}.xml\"/>"
