@@ -499,4 +499,61 @@ T*
 T*
 () Tj
 T*
-(14. QUICK FIRST-TIME USER SCRIPT \(DEMO
+(14. QUICK FIRST-TIME USER SCRIPT \(DEMO READY\)) Tj
+T*
+() Tj
+T*
+(1.  Login with email/password.) Tj
+T*
+(2.  Open `Catalog AI`.) Tj
+T*
+(3.  Say: "Show sneakers under 3000".) Tj
+T*
+(4.  Add one item using card button.) Tj
+T*
+(5.  Open cart and remove one item.) Tj
+T*
+(6.  Go to checkout and complete all 3 steps.) Tj
+T*
+(7.  Place order and show confirmation screen.) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(End of user interaction guide.) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000168 00000 n 
+0000002044 00000 n 
+0000002170 00000 n 
+0000003599 00000 n 
+0000003725 00000 n 
+0000005320 00000 n 
+0000005446 00000 n 
+0000006997 00000 n 
+0000007124 00000 n 
+0000008624 00000 n 
+0000008752 00000 n 
+trailer
+<< /Size 14 /Root 13 0 R >>
+startxref
+8802
+%%EOF
