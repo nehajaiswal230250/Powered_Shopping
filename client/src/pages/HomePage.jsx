@@ -1498,3 +1498,177 @@ export default function HomePage({ currentUser, onLogout }) {
               />
               <div className="stack">
                 <RecommendationsPanel items={recommendations} onAdd={addToCart} />
+                <HistoryPanel history={history} />
+              </div>
+            </section>
+          ) : null}
+
+          {activeView === "checkout" ? (
+            cart.count || orderResult ? (
+              <CheckoutPanel
+                cart={cart}
+                form={checkoutForm}
+                isProcessing={isCheckoutProcessing}
+                orderResult={orderResult}
+                onPlaceOrder={placeOrder}
+                onBackToCart={() => setActiveView("cart")}
+                onContinueShopping={() => {
+                  setOrderResult(null);
+                  setCheckoutError("");
+                  setCheckoutForm((prev) => ({ ...CHECKOUT_FORM_DEFAULTS, email: prev.email }));
+                  setActiveView("shop");
+                }}
+                checkoutError={checkoutError}
+                onFormChange={(key, value) =>
+                  setCheckoutForm((prev) => ({
+                    ...prev,
+                    [key]: value
+                  }))
+                }
+              />
+            ) : (
+              <section className="glass checkout-empty">
+                <h2>Checkout</h2>
+                <p className="status">Your cart is empty. Add products before placing an order.</p>
+                <button type="button" onClick={() => setActiveView("shop")}>
+                  Go to catalog
+                </button>
+              </section>
+            )
+          ) : null}
+
+          {activeView === "assistant" ? (
+            <section className="layout">
+              <div className="stack">
+                <VoiceControl {...voiceControlProps} />
+                <HistoryPanel history={history} />
+              </div>
+              <div className="stack">
+                <RecommendationsPanel items={recommendations} onAdd={addToCart} />
+                <CartPanel
+                  cart={cart}
+                  onRemove={removeFromCart}
+                  onProceedCheckout={openCheckoutView}
+                />
+              </div>
+            </section>
+          ) : null}
+
+          {activeView === "settings" ? (
+            <section className="settings-shell">
+              <div className="glass settings-card">
+                <h2>Settings</h2>
+                <p className="status">Tune assistant behavior, memory, and cart flow preferences.</p>
+
+                <div className="settings-list">
+                  <label className="setting-row">
+                    <span>Voice replies</span>
+                    <input
+                      type="checkbox"
+                      checked={settings.voiceReplies}
+                      onChange={() =>
+                        setSettings((prev) => ({ ...prev, voiceReplies: !prev.voiceReplies }))
+                      }
+                    />
+                  </label>
+                  <label className="setting-row">
+                    <span>AI assistant mode</span>
+                    <input
+                      type="checkbox"
+                      checked={settings.aiAssistantMode}
+                      onChange={() =>
+                        setSettings((prev) => ({ ...prev, aiAssistantMode: !prev.aiAssistantMode }))
+                      }
+                    />
+                  </label>
+                  <label className="setting-row">
+                    <span>Open cart after add</span>
+                    <input
+                      type="checkbox"
+                      checked={settings.autoOpenCartOnAdd}
+                      onChange={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          autoOpenCartOnAdd: !prev.autoOpenCartOnAdd
+                        }))
+                      }
+                    />
+                  </label>
+                </div>
+
+                <div className="settings-actions">
+                  <button type="button" onClick={() => setHistory([])}>
+                    Clear history
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLastCategory("");
+                      removeStoredValue(LAST_CATEGORY_KEY);
+                    }}
+                  >
+                    Clear last category
+                  </button>
+                  <button type="button" onClick={() => setSettings(DEFAULT_SETTINGS)}>
+                    Reset settings
+                  </button>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {activeView === "faq" ? (
+            <section className="faq-shell">
+              <div className="glass faq-card">
+                <h2>Help</h2>
+                <p className="status">Fast answers for voice, catalog, and checkout workflows.</p>
+                <div className="faq-list">
+                  {FAQ_ITEMS.map((item) => (
+                    <details key={item.q} className="faq-item">
+                      <summary>{item.q}</summary>
+                      <p>{item.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
+        </section>
+      </div>
+
+      {aiCursorGhost ? (
+        <div
+          className="ai-cursor-ghost"
+          aria-hidden="true"
+          style={{
+            "--x0": String(aiCursorGhost.x0),
+            "--y0": String(aiCursorGhost.y0),
+            "--x1": String(aiCursorGhost.x1),
+            "--y1": String(aiCursorGhost.y1),
+            "--dist": String(aiCursorGhost.dist),
+            "--angle": String(aiCursorGhost.angle)
+          }}
+        >
+          <span className="trail" />
+          <span className="ghost" />
+        </div>
+      ) : null}
+
+      <FloatingMikeButton
+        supported={supported}
+        isListening={isListening}
+        assistantAwake={assistantAwake}
+        interimText={interimText}
+        recognizedText={recognizedText}
+        error={error}
+        isFallbackRecording={isFallbackRecording}
+        fallbackStatus={fallbackStatus}
+        fallbackError={fallbackError}
+        forceFallback={forceFallback}
+        onToggleListening={toggleListening}
+        onRecordFallback={recordFallbackCommand}
+        onOpenAssistant={() => setActiveView("assistant")}
+      />
+    </main>
+  );
+}
