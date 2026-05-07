@@ -198,3 +198,203 @@ const ensureSpace = (heightNeeded) => {
   if (y + heightNeeded > usableBottom) {
     addPage("content");
   }
+};
+
+const drawSectionTitle = (title) => {
+  ensureSpace(30);
+  drawRect(MARGIN_X - 4, y - 16, BODY_WIDTH + 8, 24, COLORS.sectionChip);
+  drawRect(MARGIN_X - 4, y - 16, 6, 24, COLORS.sectionChipEdge);
+  drawText({
+    text: title,
+    x: MARGIN_X + 10,
+    yTop: y,
+    size: 13,
+    font: FONT_BOLD,
+    rgb: COLORS.header
+  });
+  y += 28;
+};
+
+const drawParagraph = (text) => {
+  const lines = wrapText(text, BODY_WIDTH - 8, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+  for (const line of lines) {
+    drawText({
+      text: line,
+      x: MARGIN_X + 4,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 2;
+};
+
+const drawBullet = (text) => {
+  const bulletX = MARGIN_X + 8;
+  const textX = MARGIN_X + 20;
+  const lines = wrapText(text, BODY_WIDTH - 26, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+
+  drawRect(bulletX, y - 8, 5, 5, COLORS.accent);
+  drawText({
+    text: lines[0],
+    x: textX,
+    yTop: y,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.text
+  });
+  y += 15;
+
+  for (let i = 1; i < lines.length; i += 1) {
+    drawText({
+      text: lines[i],
+      x: textX,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 1;
+};
+
+const drawNumbered = (index, text) => {
+  const prefix = `${index}.`;
+  const prefixWidth = textWidthApprox(prefix, 11, true) + 8;
+  const lines = wrapText(text, BODY_WIDTH - 8 - prefixWidth, 11, false);
+  ensureSpace(lines.length * 16 + 4);
+
+  drawText({
+    text: prefix,
+    x: MARGIN_X + 4,
+    yTop: y,
+    size: 11,
+    font: FONT_BOLD,
+    rgb: COLORS.header
+  });
+
+  drawText({
+    text: lines[0],
+    x: MARGIN_X + 4 + prefixWidth,
+    yTop: y,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.text
+  });
+  y += 15;
+
+  for (let i = 1; i < lines.length; i += 1) {
+    drawText({
+      text: lines[i],
+      x: MARGIN_X + 4 + prefixWidth,
+      yTop: y,
+      size: 11,
+      font: FONT_REGULAR,
+      rgb: COLORS.text
+    });
+    y += 15;
+  }
+  y += 1;
+};
+
+// Cover page
+addPage("cover");
+drawRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, COLORS.header);
+drawRect(0, 0, PAGE_WIDTH, 10, COLORS.accent);
+drawRect(0, PAGE_HEIGHT - 26, PAGE_WIDTH, 26, COLORS.accent);
+drawRect(MARGIN_X, 174, PAGE_WIDTH - MARGIN_X * 2, 2, COLORS.accent);
+
+const titleToken = tokens.find((t) => t.type === "doc-title");
+const titleText = titleToken?.text || "Powered Shopping";
+
+drawText({
+  text: titleText,
+  x: MARGIN_X,
+  yTop: 210,
+  size: 33,
+  font: FONT_BOLD,
+  rgb: COLORS.white
+});
+
+drawText({
+  text: "User Interface Interaction Guide",
+  x: MARGIN_X,
+  yTop: 248,
+  size: 19,
+  font: FONT_REGULAR,
+  rgb: COLORS.titleLight
+});
+
+drawText({
+  text: "A visual walkthrough of how users interact with the app",
+  x: MARGIN_X,
+  yTop: 286,
+  size: 12,
+  font: FONT_REGULAR,
+  rgb: COLORS.titleLight
+});
+
+let coverMetaY = 344;
+for (const token of tokens) {
+  if (token.type !== "meta") continue;
+  drawText({
+    text: token.text,
+    x: MARGIN_X,
+    yTop: coverMetaY,
+    size: 11,
+    font: FONT_REGULAR,
+    rgb: COLORS.titleLight
+  });
+  coverMetaY += 18;
+}
+
+drawText({
+  text: "Designed report version generated automatically",
+  x: MARGIN_X,
+  yTop: PAGE_HEIGHT - 70,
+  size: 10,
+  font: FONT_REGULAR,
+  rgb: COLORS.titleLight
+});
+
+// Content pages
+addPage("content");
+
+for (const section of sections) {
+  drawSectionTitle(section.title);
+
+  for (const item of section.items) {
+    if (item.type === "space") {
+      y += 8;
+      continue;
+    }
+    if (item.type === "paragraph") {
+      drawParagraph(item.text);
+      continue;
+    }
+    if (item.type === "bullet") {
+      drawBullet(item.text);
+      continue;
+    }
+    if (item.type === "number") {
+      drawNumbered(item.index, item.text);
+    }
+  }
+  y += 10;
+}
+
+// Build PDF objects
+const objects = [];
+const addObject = (content) => {
+  objects.push(content);
+  return objects.length;
+};
+
+const fontRegularId = addObject(
+  "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
+);
