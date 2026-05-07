@@ -598,3 +598,61 @@ html = f"""<!doctype html>
         <div class="slide">
           <h1>${{s.title}}</h1>
           <div class="screens">
+            <div>
+              <div class="desktop-panel"><img src="${{s.desktop}}" /></div>
+              <div class="screen-chips">
+                <div class="screen-chip" style="background:#1e4e8c">Desktop view</div>
+                <div class="screen-chip" style="background:#1fa6c7">Mobile view</div>
+                <div class="screen-chip" style="background:#e65b87">Live project proof</div>
+              </div>
+            </div>
+            <div class="mobile-panel"><img src="${{s.mobile}}" /></div>
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'strengths') {{
+      app.innerHTML = `
+        <div class="slide">
+          <h1>${{s.title}}</h1>
+          <div class="strengths-top">
+            ${{s.stats.map(stat => `
+              <div class="stat" style="background:${{stat[2]}}">
+                <div class="big">${{stat[0]}}</div>
+                <div class="small">${{stat[1]}}</div>
+              </div>`).join('')}}
+          </div>
+          <div class="strength-list">
+            ${{s.items.map(item => `
+              <div class="strength">
+                <div class="tag" style="background:${{item[2]}}">${{item[0]}}</div>
+                <p>${{item[1]}}</p>
+              </div>`).join('')}}
+          </div>
+          ${{footer}}
+        </div>`;
+    }} else if (s.type === 'closing') {{
+      app.innerHTML = `
+        <div class="slide dark">
+          <div class="label">CONCLUSION</div>
+          <h1>${{s.title}}</h1>
+          <div class="subtitle">${{s.subtitle}}</div>
+          <div class="subtitle" style="margin-top:34px;max-width:710px;">
+            This project combines AI, voice interaction, and full-stack development.
+            It shows how technology can improve shopping while staying reliable and demo-ready.
+          </div>
+          <div class="closing-right">
+            <div class="closing-pill">Questions</div>
+            <div class="closing-pill">Project flow</div>
+            <div class="closing-pill">Technology used</div>
+            <div class="closing-pill">Live demo</div>
+            <div class="closing-pill">Future scope</div>
+          </div>
+          ${{footer}}
+        </div>`;
+    }}
+  </script>
+</body>
+</html>"""
+
+OUT.write_text(html, encoding="utf-8")
+print(OUT)
