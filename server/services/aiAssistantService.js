@@ -298,3 +298,103 @@ const normalizeHistory = (history = []) =>
 
 const readOpenAiError = async (response) => {
   const rawText = await response.text();
+  if (!rawText) {
+    return "";
+  }
+
+  try {
+    const data = JSON.parse(rawText);
+    return data?.error?.message || data?.message || rawText;
+  } catch {
+    return rawText;
+  }
+};
+
+export const runAiAssistant = async ({ message, history = [], cartId }) => {
+  const userMessage = String(message || "").trim();
+  if (!userMessage) {
+    throw new Error("Message is required.");
+  }
+
+  const state = createState();
+  const context = { cartId: cartId || "default" };
+
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...normalizeHistory(history),
+    { role: "user", content: userMessage }
+  ];
+
+  let finalReply = "";
+
+  for (let i = 0; i < TOOL_LOOP_LIMIT; i += 1) {
+    const assistantMessage = await openAiCall(messages);
+    if (!assistantMessage) {
+      break;
+    }
+
+    if (assistantMessage.tool_calls?.length) {
+      messages.push({
+        role: "assistant",
+        content: assistantMessage.content || "",
+        tool_calls: assistantMessage.tool_calls
+      });
+
+      for (const toolCall of assistantMessage.tool_calls) {
+        const toolName = toolCall.function?.name;
+        let args = {};
+        try {
+          args = JSON.parse(toolCall.function?.arguments || "{}");
+        } catch {
+          args = {};
+        }
+
+        const result = await executeTool(toolName, args, context, state);
+        messages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: JSON.stringify(result)
+        });
+      }
+
+      continue;
+    }
+
+    finalReply = assistantMessage.content || "";
+    break;
+  }
+
+  if (!finalReply) {
+    finalReply = "I can help with search, cart updates, recommendations, and checkout. What should I do?";
+  }
+
+  if (!state.cart) {
+    state.cart = summarizeCart(await cartStore.getItems(context.cartId));
+  }
+
+  return {
+    reply: finalReply,
+    ui: {
+      ...(state.products ? { products: state.products } : {}),
+      ...(state.recommendations ? { recommendations: state.recommendations } : {}),
+      ...(state.cart ? { cart: state.cart } : {}),
+      ...(state.orderResult ? { orderResult: state.orderResult } : {}),
+      ...(state.activeView ? { activeView: state.activeView } : {}),
+      ...(state.lastCategory ? { lastCategory: state.lastCategory } : {})
+    }
+  };
+};
+
+export const transcribeAudio = async ({ audioBase64, mimeType = "audio/webm" }) => {
+  if (!audioBase64 || typeof audioBase64 !== "string") {
+    throw new Error("audioBase64 is required.");
+  }
+
+  const audioBuffer = Buffer.from(audioBase64, "base64");
+  if (!audioBuffer.length) {
+    throw new Error("Audio payload is empty.");
+  }
+
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+  if (geminiApiKey && !geminiApiKey.includes("your_")) {
+    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
