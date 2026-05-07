@@ -398,3 +398,203 @@ def build_problem_slide() -> SlideBuilder:
             h=inches(1.7),
             fill=COLORS["white"],
             line=COLORS["blue_line"],
+            geom="roundRect",
+            name=f"Card {idx}",
+        )
+        slide.add_shape(
+            x=inches(x + 0.22),
+            y=inches(y + 0.2),
+            w=inches(1.28),
+            h=inches(0.42),
+            fill=color,
+            line=None,
+            geom="roundRect",
+            text=[label],
+            font="Calibri",
+            size=1200,
+            color=COLORS["white"],
+            bold=True,
+            align="ctr",
+            valign="ctr",
+            inset=(0, 0, 0, 0),
+            name=f"Label {idx}",
+        )
+        slide.add_shape(
+            x=inches(x + 0.25),
+            y=inches(y + 0.8),
+            w=inches(4.55),
+            h=inches(0.65),
+            fill=None,
+            line=None,
+            text=[text],
+            font="Calibri",
+            size=1500,
+            color=COLORS["ink"],
+            txbox=True,
+            name=f"Body {idx}",
+        )
+    add_footer(slide, "02")
+    return slide
+
+
+def build_scope_slide() -> SlideBuilder:
+    slide = SlideBuilder("Scope")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.55),
+        y=inches(0.72),
+        w=inches(3.6),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["Proposed solution and user journey"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    slide.add_shape(
+        x=inches(0.6),
+        y=inches(1.45),
+        w=inches(5.9),
+        h=inches(4.95),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Mandatory Panel",
+    )
+    slide.add_shape(
+        x=inches(0.82),
+        y=inches(1.72),
+        w=inches(1.9),
+        h=inches(0.42),
+        fill=COLORS["navy"],
+        geom="roundRect",
+        line=None,
+        text=["USER JOURNEY"],
+        font="Calibri",
+        size=1200,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Mandatory Label",
+    )
+    left_items = [
+        "1. User logs in with email/password or Google.",
+        "2. User speaks or types a command such as show shoes under 2000.",
+        "3. App returns products, recommendations, or cart updates.",
+        "4. User adds items and completes checkout in the same flow.",
+    ]
+    for idx, item in enumerate(left_items):
+        slide.add_shape(
+            x=inches(0.92),
+            y=inches(2.35 + idx * 0.82),
+            w=inches(5.05),
+            h=inches(0.5),
+            fill=COLORS["blue_soft"],
+            line=None,
+            geom="roundRect",
+            text=[item],
+            font="Calibri",
+            size=1350,
+            color=COLORS["ink"],
+            bold=False,
+            align="l",
+            valign="ctr",
+            inset=(inches(0.12), 0, inches(0.08), 0),
+            name=f"Mandatory Item {idx+1}",
+        )
+
+    slide.add_shape(
+        x=inches(6.8),
+        y=inches(1.45),
+        w=inches(5.9),
+        h=inches(4.95),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Enhancement Panel",
+    )
+    slide.add_shape(
+        x=inches(7.02),
+        y=inches(1.72),
+        w=inches(2.25),
+        h=inches(0.42),
+        fill=COLORS["teal"],
+        geom="roundRect",
+        line=None,
+        text=["SOLUTION MODULES"],
+        font="Calibri",
+        size=1200,
+        color=COLORS["white"],
+        bold=True,
+        align="ctr",
+        valign="ctr",
+        inset=(0, 0, 0, 0),
+        name="Optional Label",
+    )
+    right_items = [
+        "Authentication and protected dashboard",
+        "Voice and text shopping assistant",
+        "Catalog, filters, and recommendation engine",
+        "Cart, checkout, and persistence layer",
+    ]
+    for idx, item in enumerate(right_items):
+        slide.add_shape(
+            x=inches(7.12),
+            y=inches(2.35 + idx * 0.82),
+            w=inches(5.05),
+            h=inches(0.5),
+            fill=COLORS["paper_warm"],
+            line=None,
+            geom="roundRect",
+            text=[item],
+            font="Calibri",
+            size=1350,
+            color=COLORS["ink"],
+            align="l",
+            valign="ctr",
+            inset=(inches(0.12), 0, inches(0.08), 0),
+            name=f"Optional Item {idx+1}",
+        )
+    add_footer(slide, "03")
+    return slide
+
+
+def build_process_slide() -> SlideBuilder:
+    slide = SlideBuilder("Process")
+    slide.add_shape(x=0, y=0, w=SLIDE_W, h=SLIDE_H, fill=COLORS["paper"], line=None, name="BG")
+    slide.add_shape(
+        x=inches(0.58),
+        y=inches(0.72),
+        w=inches(4.0),
+        h=inches(0.5),
+        fill=None,
+        line=None,
+        text=["How the project works internally"],
+        font="Calibri Light",
+        size=2300,
+        color=COLORS["ink"],
+        bold=True,
+        txbox=True,
+        name="Title",
+    )
+    slide.add_shape(
+        x=inches(0.62),
+        y=inches(1.55),
+        w=inches(4.55),
+        h=inches(4.9),
+        fill=COLORS["white"],
+        line=COLORS["blue_line"],
+        geom="roundRect",
+        name="Narrative Panel",
+    )
+    lines = [
+        "01  User gives input by voice or text",
+        "02  Frontend captures the request and sends it forward",
+        "03  Backend routes it to product, cart, or AI services",
+        "04  AI tools or fallback parser decide the correct action",
