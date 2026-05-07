@@ -398,3 +398,45 @@ const addObject = (content) => {
 const fontRegularId = addObject(
   "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
 );
+const fontBoldId = addObject(
+  "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>"
+);
+const pagesId = addObject("");
+const pageObjectIds = [];
+
+for (const page of pages) {
+  const streamContent = page.commands.join("\n");
+  const contentId = addObject(
+    `<< /Length ${Buffer.byteLength(streamContent, "utf8")} >>\nstream\n${streamContent}\nendstream`
+  );
+
+  const pageId = addObject(
+    `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /${FONT_REGULAR} ${fontRegularId} 0 R /${FONT_BOLD} ${fontBoldId} 0 R >> >> /Contents ${contentId} 0 R >>`
+  );
+  pageObjectIds.push(pageId);
+}
+
+objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageObjectIds
+  .map((id) => `${id} 0 R`)
+  .join(" ")}] /Count ${pageObjectIds.length} >>`;
+
+const catalogId = addObject(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+
+let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+const offsets = [0];
+
+for (let i = 0; i < objects.length; i += 1) {
+  offsets.push(Buffer.byteLength(pdf, "binary"));
+  pdf += `${i + 1} 0 obj\n${objects[i]}\nendobj\n`;
+}
+
+const xrefStart = Buffer.byteLength(pdf, "binary");
+pdf += `xref\n0 ${objects.length + 1}\n`;
+pdf += "0000000000 65535 f \n";
+for (let i = 1; i <= objects.length; i += 1) {
+  pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+}
+pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+
+fs.writeFileSync(OUTPUT_FILE, pdf, "binary");
+console.log(`Created ${OUTPUT_FILE} (${pages.length} pages).`);
