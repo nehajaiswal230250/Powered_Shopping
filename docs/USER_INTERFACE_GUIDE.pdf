@@ -257,4 +257,135 @@ T*
 T*
 (-  `Apply` runs current filter set) Tj
 T*
-(-  `Reset` c
+(-  `Reset` clears filter inputs) Tj
+T*
+() Tj
+T*
+(7. VOICE COPILOT INTERACTION) Tj
+T*
+() Tj
+T*
+(Voice panel supports three input styles:) Tj
+T*
+(-  Live mic stream \(`Activate Voice Stream`\)) Tj
+T*
+(-  Fallback recorder \(`Record Voice Command`\)) Tj
+T*
+(-  Manual text command box) Tj
+T*
+() Tj
+T*
+(CONTINUOUS MODE) Tj
+T*
+() Tj
+T*
+(If enabled, app keeps listening after each command until user stops it.) Tj
+T*
+() Tj
+T*
+(SAMPLE COMMANDS USERS CAN SPEAK/TYPE) Tj
+T*
+() Tj
+T*
+(-  "Find premium headphones under 5000") Tj
+T*
+(-  "Show top rated sneakers") Tj
+T*
+(-  "Add the first result to cart") Tj
+T*
+(-  "Remove smartwatch from cart") Tj
+T*
+(-  "Recommend trending gadgets") Tj
+T*
+(-  "Prepare checkout") Tj
+T*
+() Tj
+T*
+(WHAT USER GETS BACK) Tj
+T*
+() Tj
+T*
+(-  Spoken response \(if Voice Replies setting is ON\)) Tj
+T*
+(-  Updated product list/cart/recommendations) Tj
+T*
+(-  Conversation history entry) Tj
+T*
+() Tj
+T*
+(8. CART INTERACTION \(CART QUEUE\)) Tj
+T*
+() Tj
+T*
+(Cart panel shows:) Tj
+T*
+(-  all selected items) Tj
+T*
+(-  quantity x item price) Tj
+T*
+(-  total cart value) Tj
+T*
+() Tj
+T*
+(User actions:) Tj
+T*
+(-  `Remove` individual items) Tj
+T*
+(-  `Open Checkout Flow` for guided 3-step checkout) Tj
+T*
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 1499 >>
+stream
+BT
+/F1 10 Tf
+14 TL
+50 742 Td
+(-  `Instant Checkout` for fast direct checkout) Tj
+T*
+() Tj
+T*
+(If cart is empty, panel shows "Cart is empty." and checkout buttons stay disabled.) Tj
+T*
+() Tj
+T*
+(9. CHECKOUT INTERACTION \(3-STEP\)) Tj
+T*
+() Tj
+T*
+(Step 1: Delivery) Tj
+T*
+(-  full name, email, phone, address, city, zip) Tj
+T*
+() Tj
+T*
+(Step 2: Payment) Tj
+T*
+(-  choose Card / UPI / Cash on Delivery) Tj
+T*
+(-  card mode asks for name and last 4 digits) Tj
+T*
+() Tj
+T*
+(Step 3: Review) Tj
+T*
+(-  shipping details) Tj
+T*
+(-  contact details) Tj
+T*
+(-  payment type) Tj
+T*
+(-  order summary) Tj
+T*
+() Tj
+T*
+(Pricing shown to user:) Tj
+T*
+(-  Subtotal) Tj
+T*
+(-  Shipp
