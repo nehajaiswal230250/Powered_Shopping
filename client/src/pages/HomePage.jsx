@@ -298,3 +298,203 @@ export default function HomePage({ currentUser, onLogout }) {
     if (!best) return null;
     if ((scored[0]?.score || 0) >= 3) return best;
     return items[0] || null;
+  }, []);
+
+  useEffect(() => () => clearAiTimers(), [clearAiTimers]);
+
+  useEffect(() => {
+    if (!aiFocusProductId || activeView !== "shop") {
+      return;
+    }
+
+    const handle = window.setTimeout(() => {
+      const source =
+        document.querySelector(".mike-orb-button") ||
+        document.querySelector(".ai-activity-icon") ||
+        document.querySelector(".voice-orb");
+      const target = document.getElementById(`product-${aiFocusProductId}`);
+
+      if (source && target) {
+        const sourceRect = source.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const x0 = sourceRect.left + sourceRect.width / 2;
+        const y0 = sourceRect.top + sourceRect.height / 2;
+
+        // Scroll first so the end point is where the user actually sees the card.
+        if (target?.scrollIntoView) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        window.setTimeout(() => {
+          const rectAfter = target.getBoundingClientRect();
+          const x1 = rectAfter.left + rectAfter.width / 2;
+          const y1 = rectAfter.top + Math.min(42, rectAfter.height / 2);
+          const dx = x1 - x0;
+          const dy = y1 - y0;
+          const dist = Math.max(20, Math.hypot(dx, dy));
+          const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+          setAiCursorGhost({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            x0,
+            y0,
+            x1,
+            y1,
+            dist,
+            angle
+          });
+
+          scheduleAiTimer(() => setAiCursorGhost(null), 950);
+        }, 240);
+      } else if (target?.scrollIntoView) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 80);
+
+    return () => clearTimeout(handle);
+  }, [activeView, aiFocusProductId, scheduleAiTimer]);
+
+  useEffect(() => {
+    if (!currentUser?.email) {
+      return;
+    }
+
+    setCheckoutForm((prev) => (prev.email ? prev : { ...prev, email: currentUser.email }));
+  }, [currentUser?.email]);
+
+  const appendHistory = useCallback((command, response) => {
+    setHistory((prev) =>
+      [
+        {
+          id: createId(),
+          command,
+          response,
+          createdAt: Date.now()
+        },
+        ...prev
+      ].slice(0, 20)
+    );
+  }, []);
+
+  const replyToUser = useCallback(
+    (command, response) => {
+      if (settings.voiceReplies) {
+        speak(response);
+      }
+      appendHistory(command, response);
+    },
+    [appendHistory, settings.voiceReplies, speak]
+  );
+
+  const loadCart = useCallback(async () => {
+    try {
+      const response = await api.getCart();
+      setCart({ items: response.items, total: response.total, count: response.count });
+      setUsingDemoData(false);
+    } catch {
+      setUsingDemoData(true);
+    }
+  }, []);
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await api.getCategories();
+      setCategories(response.items);
+      setUsingDemoData(false);
+    } catch {
+      setCategories(getDemoCategories());
+      setUsingDemoData(true);
+    }
+  }, []);
+
+  const loadProducts = useCallback(async (params = {}) => {
+    setIsLoadingProducts(true);
+    try {
+      const response = await api.getProducts(params);
+      setProducts(response.items);
+      setUsingDemoData(false);
+      return response.items;
+    } catch {
+      const fallback = filterDemoProducts(params);
+      setProducts(fallback);
+      setUsingDemoData(true);
+      return fallback;
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, []);
+
+  const loadRecommendations = useCallback(async (params = {}) => {
+    try {
+      const response = await api.getRecommendations(params);
+      setRecommendations(response.items);
+      setUsingDemoData(false);
+    } catch {
+      setRecommendations(getTrendingDemoProducts());
+      setUsingDemoData(true);
+    }
+  }, []);
+
+  const addToCart = useCallback(
+    async (productId, sourceCommand = "manual add") => {
+      setOrderResult(null);
+
+      try {
+        const response = await api.addToCart(productId);
+        setCart({ items: response.items, total: response.total, count: response.count });
+        setUsingDemoData(false);
+      } catch {
+        setUsingDemoData(true);
+        const fallbackProduct = [...products, ...DEMO_PRODUCTS].find((item) => item.id === productId);
+        if (!fallbackProduct) {
+          if (sourceCommand !== "manual add") {
+            replyToUser(sourceCommand, "I could not find that item.");
+          }
+          return;
+        }
+
+        setCart((prev) => {
+          const existing = prev.items.find((item) => item.product.id === productId);
+          const items = existing
+            ? prev.items.map((item) =>
+                item.product.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+              )
+            : [...prev.items, { product: fallbackProduct, quantity: 1 }];
+          return normalizeCart(items);
+        });
+      }
+
+      const reply = "Item added to cart.";
+      if (settings.voiceReplies) {
+        speak(reply);
+      }
+      if (settings.autoOpenCartOnAdd) {
+        setActiveView("cart");
+      }
+      if (sourceCommand !== "manual add") {
+        appendHistory(sourceCommand, reply);
+      }
+    },
+    [appendHistory, products, replyToUser, settings.autoOpenCartOnAdd, settings.voiceReplies, speak]
+  );
+
+  const resolveProductFromCommand = useCallback(
+    (intent) => {
+      const normalizedItemName = String(intent.itemName || "")
+        .trim()
+        .toLowerCase();
+      const refersToCurrentItem =
+        !normalizedItemName ||
+        ["this", "this item", "it", "that", "that item", "selected", "selected item"].includes(
+          normalizedItemName
+        );
+
+      if (Number.isInteger(intent.index) && products[intent.index]) {
+        return products[intent.index];
+      }
+
+      if (refersToCurrentItem) {
+        return products[0] || null;
+      }
+
+      const uniqueProducts = [
